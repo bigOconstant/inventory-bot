@@ -1,0 +1,9 @@
+{
+    "delayseconds" : 1,
+    "useragent" : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
+    "urls" : [
+     {"item":"tv","url":"https://www.bestbuy.com/site/insignia-40-class-led-full-hd-tv/6398122.p?skuId=6398122"},
+     {"item":"6800xt","url": "https://www.bestbuy.com/site/xfx-amd-radeon-rx-6800xt-16gb-gddr6-pci-express-4-0-gaming-graphics-card-black/6441226.p?skuId=6441226"},
+     {"item":"phone","url":"https://www.bestbuy.com/site/samsung-galaxy-note20-5g-128gb-unlocked-mystic-bronze/6420834.p?skuId=6420834"}
+    ]
+}
