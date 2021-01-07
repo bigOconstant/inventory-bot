@@ -11,4 +11,6 @@ Add items to urls section in settings.json. Three items are given as an example.
 
 **delayseconds**: delay in seconds between checks. 
 
-Each url is checked in a seperate thread so they can be ran concurrently. 
+Each url is checked in a seperate thread so they can be ran concurrently.
+
+**useragent**: String to tell server what web browser you are using. Spoofing browser
