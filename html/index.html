@@ -67,7 +67,6 @@ function CreateTable(inStock) {
         cell2.innerHTML = inStock.data[i].name
         cell3.innerHTML = '<a href="'+inStock.data[i].url+'"> Go To Shop <a>';
         cell4.innerHTML = inStock.data[i].instock
-       console.log(inStock.data[i].instock)
         if(inStock.data[i].instock && !instockmessageshown){
             alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
             instockmessageshown = true;
