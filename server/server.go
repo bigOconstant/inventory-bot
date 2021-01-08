@@ -11,9 +11,10 @@ import (
 )
 
 type ItemResponse struct {
-	Url  string `json:"url"`
-	Id   int    `json:id`
-	Name string `json:"name"`
+	Url     string `json:"url"`
+	Id      int    `json:id`
+	Name    string `json:"name"`
+	InStock bool   `json:"instock"`
 }
 
 type InStockResponse struct {
@@ -27,6 +28,7 @@ func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
 		r.Data[i].Id = i
 		r.Data[i].Name = input.Items[i].Name
 		r.Data[i].Url = input.Items[i].URL
+		r.Data[i].InStock = input.Items[i].InStock
 	}
 }
 
