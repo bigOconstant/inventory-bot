@@ -44,10 +44,16 @@ func (self *Server) GetInStockItems(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(msg))
 
 }
+func (self *Server) faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./html/favicon.ico")
+}
 
 func (self *Server) Serve(input *models.SettingsMap) {
 	self.data = input
 	self.Router = mux.NewRouter().StrictSlash(true)
 	self.Router.HandleFunc("/items", self.GetInStockItems)
+	self.Router.Handle("/", http.FileServer(http.Dir("./html")))
+	self.Router.HandleFunc("/favicon.ico", self.faviconHandler)
+
 	log.Fatal(http.ListenAndServe(":3000", self.Router))
 }

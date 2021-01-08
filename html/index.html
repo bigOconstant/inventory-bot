@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.ten {
+  width: 10%;
+}
+</style>
+</head>
+<body>
+
+<h2>Monitored Items (Refreshes everyone second)</h2>
+
+<table id="tab">
+  <tr>
+    <th class="ten">Id</th>
+    <th>Name</th>
+    <th>URL</th>
+    <th>InStock</th>
+  </tr>
+  
+</table>
+
+<img src="./favicon.ico" alt="Wolf Fur"> 
+</body>
+</html>
+
+
+<script>
+
+instockmessageshown = false
+
+function ClearTable() {
+    var myTable = document.getElementById('tab');
+    var rowCount = myTable.rows.length; 
+    while(--rowCount) myTable.deleteRow(rowCount);
+}
+
+function CreateTable(inStock) {
+    
+    var table = document.getElementById("tab");
+
+    for(var i = 0; i < inStock.data.length; ++i) {
+        var row = table.insertRow(table.rows.length);
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        var cell3 = row.insertCell(2);
+        var cell4 = row.insertCell(3);
+
+        cell1.innerHTML = inStock.data[i].Id
+        cell2.innerHTML = inStock.data[i].name
+        cell3.innerHTML = '<a href="'+inStock.data[i].url+'"> Go To Shop <a>';
+        cell4.innerHTML = inStock.data[i].instock
+       console.log(inStock.data[i].instock)
+        if(inStock.data[i].instock && !instockmessageshown){
+            alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
+            instockmessageshown = true;
+        }
+        
+    }
+}
+
+function UpdateTable(){
+
+fetch('http://localhost:3000/items')
+  .then(response => response.json())
+  .then(data => {
+    ClearTable()
+    CreateTable(data)
+
+    
+  });
+
+  setTimeout(UpdateTable, 1000);
+}
+  
+UpdateTable();
+</script>

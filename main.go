@@ -29,6 +29,10 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 	}
 
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		fmt.Println("Error getting page ", url.URL)
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
