@@ -55,7 +55,6 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	path, _ := os.Getwd()
 	path = path + "/html/index.html"
 	hpage, _ := ioutil.ReadFile(path)
-
 	homeTempl := template.Must(template.New("").Parse(string(hpage)))
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)

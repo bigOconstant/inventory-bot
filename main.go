@@ -19,6 +19,8 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 
 	req, err := http.NewRequest("GET", url.URL, nil)
 	if err != nil {
+		println("Error calling Get")
+		println(err.Error())
 		log.Fatalln(err)
 	}
 
@@ -26,7 +28,10 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		println("Error calling do!")
+		println(err.Error())
 		log.Fatalln(err)
+
 	}
 
 	defer resp.Body.Close()
@@ -36,6 +41,8 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		println("Error reading body here")
+		println(err.Error())
 		log.Fatalln(err)
 	}
 

@@ -26,7 +26,6 @@ tr:nth-child(even) {
 <body>
 
 <h2>Monitored Items (Refreshes every second)</h2>
-<p>host:{{.Host}}</p>
 <table id="tab">
   <tr>
     <th class="ten">Id</th>
@@ -37,14 +36,15 @@ tr:nth-child(even) {
   
 </table>
 
-<img src="./favicon.ico" alt="Wolf Fur"> 
+
 </body>
 </html>
 
 
 <script>
 
-instockmessageshown = false
+
+let tableData = {}
 
 function ClearTable() {
     var myTable = document.getElementById('tab');
@@ -67,9 +67,8 @@ function CreateTable(inStock) {
         cell2.innerHTML = inStock.data[i].name
         cell3.innerHTML = '<a href="'+inStock.data[i].url+'"> Go To Shop <a>';
         cell4.innerHTML = inStock.data[i].instock
-        if(inStock.data[i].instock && !instockmessageshown){
+        if(inStock.data[i].instock ){
             alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
-            instockmessageshown = true;
         }
         
     }
@@ -80,8 +79,14 @@ function UpdateTable(){
 fetch('http://{{.Host}}:{{.Port}}/items')
   .then(response => response.json())
   .then(data => {
-    ClearTable()
-    CreateTable(data)
+
+    // only Update Table if it has changed
+    if(JSON.stringify(data) !== JSON.stringify(tableData)){
+      tableData = data
+      console.log("updating table");
+      ClearTable();
+      CreateTable(data);
+    }
 
     
   });
