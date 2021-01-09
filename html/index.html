@@ -22,10 +22,11 @@ tr:nth-child(even) {
   width: 10%;
 }
 </style>
+<title>Admin Page</title>
 </head>
 <body>
-
-<h2>Monitored Items (Refreshes every second)</h2>
+<h1>Admin Page</h1>
+<h2 style="text-align:center;">Monitored Items (Refreshes every second)</h2>
 <table id="tab">
   <tr>
     <th class="ten">Id</th>
@@ -56,6 +57,8 @@ function CreateTable(inStock) {
     
     var table = document.getElementById("tab");
 
+    inStockCount = 0;
+
     for(var i = 0; i < inStock.data.length; ++i) {
         var row = table.insertRow(table.rows.length);
         var cell1 = row.insertCell(0);
@@ -68,9 +71,13 @@ function CreateTable(inStock) {
         cell3.innerHTML = '<a href="'+inStock.data[i].url+'"> Go To Shop <a>';
         cell4.innerHTML = inStock.data[i].instock
         if(inStock.data[i].instock ){
+          ++inStockCount;
             alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
         }
         
+    }
+    if(inStockCount > 0) {
+      document.title = "("+inStockCount+")"+" Admin Page"; 
     }
 }
 
@@ -95,4 +102,5 @@ fetch('http://{{.Host}}:{{.Port}}/items')
 }
   
 UpdateTable();
+
 </script>
