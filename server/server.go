@@ -51,6 +51,10 @@ func (self *Server) faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./html/favicon.ico")
 }
 
+func (self *Server) ServeTestFile(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./html/test.html")
+}
+
 func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	path, _ := os.Getwd()
 	path = path + "/html/index.html"
@@ -76,8 +80,9 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.data = input
 	self.Router = mux.NewRouter().StrictSlash(true)
-	self.Router.HandleFunc("/items", self.GetInStockItems)
+	self.Router.HandleFunc("/api/items", self.GetInStockItems)
 	self.Router.HandleFunc("/", self.ServeHome)
+	self.Router.HandleFunc("/test", self.ServeTestFile)
 	self.Router.HandleFunc("/favicon.ico", self.faviconHandler)
 
 	log.Fatal(http.ListenAndServe(":"+port, self.Router))

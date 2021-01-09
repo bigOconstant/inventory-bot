@@ -54,6 +54,7 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 
 	} else {
 		if url.InStock {
+			url.SetStock(false)
 			fmt.Println(url.Name, " not in stock now")
 		}
 

@@ -78,12 +78,14 @@ function CreateTable(inStock) {
     }
     if(inStockCount > 0) {
       document.title = "("+inStockCount+")"+" Admin Page"; 
+    }else{
+      document.title = "Admin Page"; 
     }
 }
 
 function UpdateTable(){
 
-fetch('http://{{.Host}}:{{.Port}}/items')
+fetch('http://{{.Host}}:{{.Port}}/api/items')
   .then(response => response.json())
   .then(data => {
 
