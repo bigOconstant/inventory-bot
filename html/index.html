@@ -26,7 +26,7 @@ tr:nth-child(even) {
 <body>
 
 <h2>Monitored Items (Refreshes every second)</h2>
-
+<p>host:{{.Host}}</p>
 <table id="tab">
   <tr>
     <th class="ten">Id</th>
@@ -77,7 +77,7 @@ function CreateTable(inStock) {
 
 function UpdateTable(){
 
-fetch('http://microbox.local/items')
+fetch('http://{{.Host}}:{{.Port}}/items')
   .then(response => response.json())
   .then(data => {
     ClearTable()

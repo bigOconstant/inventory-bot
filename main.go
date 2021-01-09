@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -52,10 +53,18 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 	}
 }
 func main() {
+	port := "3000"
+	if len(os.Args) < 2 {
+		fmt.Println("Port not specified, defaulting to 3000")
+	} else {
+		port = os.Args[1]
+		fmt.Println("port set to " + port)
+	}
+
 	data := models.SettingsMap{}
 	data.ReadFromFile()
 	server := server.Server{}
-	go server.Serve(&data)
+	go server.Serve(&data, port)
 	for true {
 		var wg sync.WaitGroup
 

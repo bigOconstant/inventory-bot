@@ -23,6 +23,8 @@ type Settings struct {
 	Delayseconds int64  `json:"delayseconds"`
 	Useragent    string `json:"useragent"`
 	Urls         []Urls `json:"urls"`
+	Host         string `json:"host"`
+	Port         string `json:"port"`
 }
 
 //Url struct
@@ -52,6 +54,8 @@ func (u *URLMutex) SetFromUrls(input Urls) {
 type SettingsMap struct {
 	Delayseconds int64
 	Useragent    string
+	Host         string
+	Port         string
 	Size         int
 	Items        map[int]*URLMutex
 }
@@ -61,6 +65,8 @@ func (s *SettingsMap) FromSettings(input *Settings) {
 	s.Size = len(input.Urls)
 	s.Useragent = input.Useragent
 	s.Items = make(map[int]*URLMutex)
+	s.Host = input.Host
+	s.Port = input.Port
 	for i := 0; i < s.Size; i++ {
 		s.Items[i] = &URLMutex{}
 		s.Items[i].SetFromUrls(input.Urls[i])

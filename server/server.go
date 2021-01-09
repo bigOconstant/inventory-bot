@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"goinventory/models"
+	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -48,12 +51,35 @@ func (self *Server) faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./html/favicon.ico")
 }
 
-func (self *Server) Serve(input *models.SettingsMap) {
+func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
+	path, _ := os.Getwd()
+	path = path + "/html/index.html"
+	hpage, _ := ioutil.ReadFile(path)
+
+	homeTempl := template.Must(template.New("").Parse(string(hpage)))
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	var v = struct {
+		Host string
+		Port string
+	}{Host: self.data.Host, Port: self.data.Port}
+	homeTempl.Execute(w, &v)
+}
+
+func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.data = input
 	self.Router = mux.NewRouter().StrictSlash(true)
 	self.Router.HandleFunc("/items", self.GetInStockItems)
-	self.Router.Handle("/", http.FileServer(http.Dir("./html")))
+	self.Router.HandleFunc("/", self.ServeHome)
 	self.Router.HandleFunc("/favicon.ico", self.faviconHandler)
 
-	log.Fatal(http.ListenAndServe(":3000", self.Router))
+	log.Fatal(http.ListenAndServe(":"+port, self.Router))
 }

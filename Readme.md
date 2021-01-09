@@ -11,14 +11,18 @@ Add items to urls section in settings.json. Three items are given as an example.
 
 **delayseconds**: delay in seconds between checks. Longer delays could lessen chances of a ip ban.
 
+**host**: host name to be used in the UI.
+
+**port**: port to be used in the UI.
+
 Each url is checked in a seperate thread.
 
 **useragent**: String to tell server what web browser you are using. Spoofing browser
 
 ## How to run
 
-`go run main.go`
+`go run main.go <Port>`
 
-Open up the UI on `localhost:3000`
+Open up the UI on `localhost:Port`
 
 UI refreshes every 1 second and updates the table with all the items. If an item suddendly becomes in stock a single notification pops up. Only one notification appears but in stock column gets updated. 
