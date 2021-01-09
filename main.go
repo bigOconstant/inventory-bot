@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"goinventory/models"
 	"goinventory/server"
@@ -13,7 +15,28 @@ import (
 	"time"
 )
 
-func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
+type Discord struct {
+	webhook string
+}
+
+func (discord *Discord) SendNotification(message string) {
+	if discord.webhook == "" {
+		return
+	}
+	messageout := models.DiscordMessage{Username: "inventoryBot", Content: message}
+
+	bytesout, _ := json.Marshal(messageout)
+	req, err := http.NewRequest("POST", discord.webhook, bytes.NewBuffer(bytesout))
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("problem sending web hook:", err)
+	}
+	defer resp.Body.Close()
+}
+
+func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, discord Discord) {
 	defer wg.Done()
 	client := &http.Client{}
 
@@ -49,7 +72,7 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 	if strings.Contains(strings.ToUpper((string(body))), "ADD TO CART") {
 		if !url.InStock {
 			url.SetStock(true)
-			fmt.Println(url.Name, " in stock go to ", url.URL, " now")
+			discord.SendNotification(url.Name + " in stock go to " + url.URL + " now")
 		}
 
 	} else {
@@ -60,7 +83,9 @@ func checkStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex) {
 
 	}
 }
+
 func main() {
+
 	port := "3000"
 	if len(os.Args) < 2 {
 		fmt.Println("Port not specified, defaulting to 3000")
@@ -71,6 +96,7 @@ func main() {
 
 	data := models.SettingsMap{}
 	data.ReadFromFile()
+	discord := Discord{data.Discord}
 	server := server.Server{}
 	go server.Serve(&data, port)
 	for true {
@@ -79,7 +105,7 @@ func main() {
 		//fmt.Println("Spliting into threads")
 		for index, item := range data.Items {
 			wg.Add(index)
-			go checkStock(&wg, data.Useragent, item)
+			go checkStock(&wg, data.Useragent, item, discord)
 		}
 
 		wg.Wait()
