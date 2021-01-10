@@ -3,9 +3,36 @@
 <head>
 <style>
 table {
-  font-family: arial, sans-serif;
+  
   border-collapse: collapse;
   width: 100%;
+  margin-bottom: 30px;
+}
+
+html, body {
+    
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100%;
+    text-align: center;
+}
+
+
+#container {
+    
+    margin-bottom: 2em;
+    min-height: 100%;
+    overflow: auto;
+    padding: 0 2em;
+    text-align: justify;
+}
+#footer {
+    bottom: 0;
+    color: #707070;
+    height: 2em;
+    left: 0;
+    position: relative;
+    font-size: small;
+    width:100%;
 }
 
 td, th {
@@ -21,24 +48,34 @@ tr:nth-child(even) {
 .ten {
   width: 10%;
 }
+
+
 </style>
-<title>Admin Page</title>
+<title >Admin</title>
 </head>
-<body>
-<h1>Admin Page</h1>
-<h2 style="text-align:center;">Monitored Items (Refreshes every second)</h2>
-<table id="tab">
-  <tr>
-    <th class="ten">Id</th>
-    <th>Name</th>
-    <th>URL</th>
-    <th>In Stock</th>
-  </tr>
+  <body>
   
-</table>
+  <div id="container">
+    
+    <h2 style="text-align:center;">Admin Page</h1>
+  <h2 style="text-align:center;">Monitored Items (Refreshes every second)</h2>
+  <table id="tab">
+    <tr>
+      <th class="ten">Id</th>
+      <th>Name</th>
+      <th>URL</th>
+      <th>In Stock</th>
+    </tr>
+    
+  </table>
 
 
+
+  </div>
+  
+  <div id="footer">Caleb McCafrthy 2021.</div>
 </body>
+
 </html>
 
 
