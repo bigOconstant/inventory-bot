@@ -16,6 +16,11 @@ type Urls struct {
 	URL  string `json:"url"`
 }
 
+type DiscordMessage struct {
+	Username string `json:"username"`
+	Content  string `json:"content"`
+}
+
 /*
 Settings holds settings json file
 */
@@ -25,6 +30,7 @@ type Settings struct {
 	Urls         []Urls `json:"urls"`
 	Host         string `json:"host"`
 	Port         string `json:"port"`
+	Discord      string `json:"discord"`
 }
 
 //Url struct
@@ -56,6 +62,7 @@ type SettingsMap struct {
 	Useragent    string
 	Host         string
 	Port         string
+	Discord      string
 	Size         int
 	Items        map[int]*URLMutex
 }
@@ -67,6 +74,7 @@ func (s *SettingsMap) FromSettings(input *Settings) {
 	s.Items = make(map[int]*URLMutex)
 	s.Host = input.Host
 	s.Port = input.Port
+	s.Discord = input.Discord
 	for i := 0; i < s.Size; i++ {
 		s.Items[i] = &URLMutex{}
 		s.Items[i].SetFromUrls(input.Urls[i])
