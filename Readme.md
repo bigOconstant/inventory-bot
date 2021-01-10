@@ -26,3 +26,12 @@ Each url is checked in a seperate thread.
 Open up the UI on `localhost:Port`
 
 UI refreshes every 1 second and updates the table with all the items. If an item suddendly becomes in stock a single notification pops up. Only one notification appears but in stock column gets updated. 
+
+## forward ip 3000 to 80
+
+
+`sudo iptables -A INPUT -i eth0 -p tcp --dport 80 -j ACCEPT`
+
+`sudo iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT`
+
+`sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000`
