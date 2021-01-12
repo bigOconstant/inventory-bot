@@ -27,16 +27,8 @@ Each url is checked in a seperate thread.
 
 Open up the UI on `localhost:Port`
 
-UI refreshes every 1 second and updates the table with all the items. If an item suddendly becomes in stock a single notification pops up. Only one notification appears but in stock column gets updated. 
+UI refreshes every 1 second and updates the table with all the items. If an item suddendly becomes in stock a single notification pops up. If a discord webhook was given a discord message will be sent.
 
-## forward ip 3000 to 80
-
-
-`sudo iptables -A INPUT -i eth0 -p tcp --dport 80 -j ACCEPT`
-
-`sudo iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT`
-
-`sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000`
 
 ## To do
 
@@ -66,3 +58,14 @@ docker run -d \
 ## Run in docker-compose (one line)
 
 `docker-compose up -d`
+
+
+## forward ip 3000 to 80 
+
+I forward 3000 to port 80 for deployment on my raspberrypi. so I don't need to specify a port in the browser
+
+`sudo iptables -A INPUT -i eth0 -p tcp --dport 80 -j ACCEPT`
+
+`sudo iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT`
+
+`sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000`
