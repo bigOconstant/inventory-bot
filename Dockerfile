@@ -5,6 +5,10 @@ FROM golang:alpine AS builder
 
 # Install git.
 RUN apk update && apk add --no-cache git
+RUN apk add --no-cache --upgrade bash
+
+RUN echo 'getting arch'
+RUN uname -m
 
 RUN apk add -U --no-cache ca-certificates && update-ca-certificates
 
@@ -16,7 +20,8 @@ COPY . .
 RUN go get -d -v
 
 # Build the binary.
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/goinventory
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /go/bin/goinventory
+
 RUN ls /go/bin/
 
 ############################

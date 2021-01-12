@@ -19,6 +19,8 @@ Each url is checked in a seperate thread.
 
 **useragent**: String to tell server what web browser you are using. Spoofing browser
 
+**discord**: Optional field. If given a discord webhook a message will be sent to the webhook channel informing of in stock items.
+
 ## How to run
 
 `go run main.go <Port>`
@@ -40,3 +42,27 @@ UI refreshes every 1 second and updates the table with all the items. If an item
 
 Work on a few important one off parsers for pages like https://www.amd.com/en/direct-buy/us where stock pops in for multiple items at a time. 
 Will likely need https://pkg.go.dev/golang.org/x/net/html
+
+
+## Run in Docker
+
+
+**build**
+
+`docker build -t goinventory`
+
+**Run**
+
+```bash
+
+docker run -d \
+  -it \
+  -p 3000:3000 \
+  -v "$(pwd)"/settings.json:/app/settings.json:ro \
+  goinventory
+  
+```
+
+## Run in docker-compose (one line)
+
+`docker-compose up -d`
