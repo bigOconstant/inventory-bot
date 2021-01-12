@@ -30,12 +30,6 @@ Open up the UI on `localhost:Port`
 UI refreshes every 1 second and updates the table with all the items. If an item suddendly becomes in stock a single notification pops up. If a discord webhook was given a discord message will be sent.
 
 
-## To do
-
-Work on a few important one off parsers for pages like https://www.amd.com/en/direct-buy/us where stock pops in for multiple items at a time. 
-Will likely need https://pkg.go.dev/golang.org/x/net/html
-
-
 ## Run in Docker
 
 
@@ -69,3 +63,9 @@ I forward 3000 to port 80 for deployment on my raspberrypi. so I don't need to s
 `sudo iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT`
 
 `sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000`
+
+
+## To do
+
+Work on a few important one off parsers for pages like https://www.amd.com/en/direct-buy/us where stock pops in for multiple items at a time. 
+Will likely need https://pkg.go.dev/golang.org/x/net/html
