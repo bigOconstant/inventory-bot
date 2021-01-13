@@ -93,6 +93,7 @@ func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.Router.HandleFunc("/test", self.ServeTestFile)
 	self.Router.HandleFunc("/about", self.ServeAbout)
 	self.Router.HandleFunc("/favicon.ico", self.faviconHandler)
+	//	log.Fatal(http.ListenAndServeTLS(":"+port, "microbox.local.crt", "microbox.local.key", nil))
 
 	log.Fatal(http.ListenAndServe(":"+port, self.Router))
 }
