@@ -47,7 +47,9 @@ func (self *Server) GetInStockItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Server) ServeAbout(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, string(abouthtml))
+	aboutTempl := template.Must(template.New("").Parse(abouthtml))
+
+	aboutTempl.Execute(w, nil)
 
 }
 func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
