@@ -34,6 +34,6 @@ COPY --from=builder /go/bin/goinventory /app/goinventory
 # Run the hello binary.
 
 COPY settings.json .
-COPY html/ /app/html/
+
 
 ENTRYPOINT ["/app/goinventory"]
