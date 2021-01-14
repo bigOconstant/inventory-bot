@@ -26,15 +26,19 @@ func main() {
 	server := server.Server{}
 	go server.Serve(&data, port)
 
+	//allocate a single waitgroup
+	wg := new(sync.WaitGroup)
+
 	// Main loop that checks stock and sleeps a given duration.
 	for true {
-		var wg sync.WaitGroup
-		for index, item := range data.Items {
-			wg.Add(index)
-			go components.CheckStock(&wg, data.Useragent, item, discord)
+		for _, item := range data.Items {
+			wg.Add(1)
+			go components.CheckStock(wg, data.Useragent, item, discord)
 		}
+
 		wg.Wait()
 		time.Sleep(time.Duration(data.Delayseconds) * time.Second)
+
 	}
 	fmt.Println("Main: Completed")
 }

@@ -1,3 +1,7 @@
+package server
+
+const homehtml string = `
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -104,8 +108,7 @@ tr:nth-child(even) {
   
   <div id="container">
     
-    <h2 style="text-align:center;">Admin Page</h1>
-  <h2 style="text-align:center;">Monitored Items (Refreshes every second)</h2>
+    <h1 style="text-align:center;">Monitored Inventory</h1>
 
   <p id="noneFoundMessage" style="display: none;color:red">No Items Found. Add some url's to settings.json</p>
   <table id="tab">
@@ -115,12 +118,27 @@ tr:nth-child(even) {
       <th>URL</th>
       <th>In Stock</th>
     </tr>
-    
+  
+     {{range .Data}}
+     <tr>
+       <td>
+         {{.Name}}
+       </td>
+       <td>
+        <a href="'{{.Url}}'"> Go To Shop <a>
+       </td>
+       <td>
+        {{.InStock}}
+       </td>
+      
+    </tr>
+    {{end}}
   </table>
 
   </div>
+ 
   
-  <div id="footer">Caleb McCafrthy 2021.</div>
+  <div id="footer">Caleb McCarthy 2021.</div>
 </body>
 
 </html>
@@ -139,7 +157,8 @@ function SetTableDisplay(bool){
   }
 }
 
-let tableData = {}
+let tableData = {data:JSON.parse('{{.DataJson}}')}
+
 
 function ClearTable() {
     var myTable = document.getElementById('tab');
@@ -180,16 +199,32 @@ function CreateTable(inStock) {
     }
 }
 
+function compareTwo(oldTable,newTable){
+  if(!oldTable.data || !newTable.data|| oldTable.data.length !== newTable.data.length){
+    return true;
+  }
+  oldTable.data.sort();
+  newTable.data.sort();
+  for (i = 0;i < oldTable.data.length; ++i){
+    if(oldTable.data[i].instock != newTable.data[i].instock){
+      return true
+    }
+  }
+  return false
+}
+
 function UpdateTable(){
 
-fetch('http://{{.Host}}:{{.Port}}/api/items')
+fetch(window.location.href+'/api/items')
   .then(response => response.json())
   .then(data => {
-
+    compareTwo
+    
     // only Update Table if it has changed
-    if(JSON.stringify(data) !== JSON.stringify(tableData)){
+    if(compareTwo(tableData,data)){
+
       tableData = data
-      console.log("updating table");
+      
       ClearTable();
       CreateTable(data);
     }
@@ -197,11 +232,11 @@ fetch('http://{{.Host}}:{{.Port}}/api/items')
     
   });
 
-  setTimeout(UpdateTable, 1000);
+  setTimeout(UpdateTable, 2000);
 }
   
 UpdateTable();
 
-
-
 </script>
+
+`

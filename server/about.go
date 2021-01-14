@@ -1,3 +1,6 @@
+package server
+
+const abouthtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -60,6 +63,7 @@ html, body {
     padding: 0 1em;
     text-align: justify;
 }
+
 #footer {
     bottom: 0;
     color: #707070;
@@ -95,7 +99,7 @@ a:active {
     
    
     <div id="container">
-    <h1 style="text-align:center;">Inventory Scanner</h1>
+    <h1 style="text-align:center;">Inventory Bot</h1>
 
     <p style="text-align:center;">Scans a given url for a Add to Cart Phrase and reports back whether it is found.</p>
 
@@ -109,6 +113,7 @@ a:active {
 
     
 </div>
-    <div id="footer">Caleb McCafrthy 2021.</div>
+    <div id="footer" style="text-align:center;" >Caleb McCarthy 2021.</div>
 </body>
 </html> 
+`

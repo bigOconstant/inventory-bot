@@ -24,13 +24,11 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 	req.Header.Set("User-Agent", Useragent)
 
 	resp, err := client.Do(req)
+
 	if err != nil {
 		println("Error calling do!")
 		println(err.Error())
-		log.Fatalln(err)
-
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
@@ -40,20 +38,27 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 	if err != nil {
 		println("Error reading body here")
 		println(err.Error())
-		log.Fatalln(err)
+
 	}
 
 	if strings.Contains(strings.ToUpper((string(body))), "ADD TO CART") {
+
 		if !url.InStock {
-			url.SetStock(true)
+			fmt.Println("in stock")
 			discord.SendNotification(url.Name + " in stock go to " + url.URL + " now")
+			url.SetStock(true)
 		}
 
 	} else {
+		//fmt.Println("not in stock setting")
+
 		if url.InStock {
-			url.SetStock(false)
+			fmt.Println("not in stock")
 			fmt.Println(url.Name, " not in stock now")
+			url.SetStock(false)
 		}
 
 	}
+
+	return
 }
