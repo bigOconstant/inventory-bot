@@ -1,7 +1,6 @@
 package server
 
 const homehtml string = `
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -115,17 +114,13 @@ tr:nth-child(even) {
     <tr>
       
       <th>Name</th>
-      <th>URL</th>
       <th>In Stock</th>
     </tr>
   
      {{range .Data}}
      <tr>
        <td>
-         {{.Name}}
-       </td>
-       <td>
-        <a href="'{{.Url}}'"> Go To Shop <a>
+         <a href="{{.Url}}"> {{.Name}} <a></a>
        </td>
        <td>
         {{.InStock}}
@@ -180,15 +175,13 @@ function CreateTable(inStock) {
         var row = table.insertRow(table.rows.length);
         var cell1 = row.insertCell(0);
         var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
         
 
-        cell1.innerHTML = inStock.data[i].name
-        cell2.innerHTML = '<a href="'+inStock.data[i].url+'"> Go To Shop <a>';
-        cell3.innerHTML = inStock.data[i].instock
+        cell1.innerHTML = '<a href="'+inStock.data[i].url+'">'+ inStock.data[i].name+'<a>';
+        cell2.innerHTML = inStock.data[i].instock
         if(inStock.data[i].instock ){
           ++inStockCount;
-            alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
+          alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
         }
         
     }
