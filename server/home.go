@@ -102,6 +102,7 @@ tr:nth-child(even) {
 
     <div class="topnav">
       <a class="active" href="#home">Home</a>
+      <a href="/add" >Add Item</a>
       <a href="/about">About</a>
     </div> 
   

@@ -81,6 +81,19 @@ func (s *SettingsMap) FromSettings(input *Settings) {
 	}
 }
 
+func (s *SettingsMap) AddItem(name string, url string) {
+	length := len(s.Items)
+	var UrlModel Urls = Urls{Item: name, URL: url}
+	urlMutex := URLMutex{}
+	urlMutex.SetFromUrls(UrlModel)
+	s.Items[length] = &urlMutex
+	s.Items[length].mu.Lock()
+	defer s.Items[length].mu.Unlock()
+	s.Items[length].URL = url
+	s.Items[length].Name = name
+	s.Size++
+}
+
 func (u *SettingsMap) ReadFromFile() {
 	settingsFile, err := os.Open("settings.json")
 	settings := Settings{}

@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"goinventory/models"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -26,6 +29,7 @@ func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
 	r.Data = make([]ItemResponse, len(input.Items))
 
 	for i := 0; i < input.Size; i++ {
+
 		r.Data[i].Id = i
 		r.Data[i].Name = input.Items[i].Name
 		r.Data[i].Url = input.Items[i].URL
@@ -76,12 +80,44 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	homeTempl.Execute(w, &v)
 }
 
+func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
+
+	path, _ := os.Getwd()
+	path = path + "/html/AddItem.html"
+	apage, _ := ioutil.ReadFile(path)
+	homeTempl := template.Must(template.New("").Parse(string(apage)))
+	if r.URL.Path != "/add" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if !(r.Method == "GET" || r.Method == "POST") {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if r.Method == "POST" {
+		r.ParseForm()
+		_, err := url.ParseRequestURI(r.FormValue("url"))
+		if err == nil {
+			self.data.AddItem(r.FormValue("iname"), r.FormValue("url"))
+
+		} else {
+			fmt.Println("invalid url")
+		}
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	homeTempl.Execute(w, nil)
+}
+
 func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.data = input
 	self.Router = mux.NewRouter().StrictSlash(true)
 	self.Router.HandleFunc("/api/items", self.GetInStockItems)
 	self.Router.HandleFunc("/", self.ServeHome)
 	self.Router.HandleFunc("/about", self.ServeAbout)
+	self.Router.HandleFunc("/add", self.ServeAddItem)
 
 	log.Fatal(http.ListenAndServe(":"+port, self.Router))
 }
