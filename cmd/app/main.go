@@ -31,6 +31,7 @@ func main() {
 
 	// Main loop that checks stock and sleeps a given duration.
 	for true {
+
 		for _, item := range data.Items {
 			wg.Add(1)
 			go components.CheckStock(wg, data.Useragent, item, discord)

@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"goinventory/internal/box"
 	"goinventory/models"
 	"html/template"
 	"log"
@@ -24,7 +25,7 @@ type InStockResponse struct {
 }
 
 func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
-	r.Data = make([]ItemResponse, len(input.Items))
+	r.Data = make([]ItemResponse, input.Size)
 
 	for i := 0; i < input.Size; i++ {
 
@@ -49,18 +50,21 @@ func (self *Server) GetInStockItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Server) ServeAbout(w http.ResponseWriter, r *http.Request) {
-	aboutTempl := template.Must(template.New("").Parse(abouthtml))
+	aboutTempl := template.Must(template.New("").Parse(string(box.Get("/about.html"))))
 
 	aboutTempl.Execute(w, nil)
+
+}
+
+func (self *Server) ServeFavicon(w http.ResponseWriter, r *http.Request) {
+	w.Write(box.Get("/favicon.ico"))
 
 }
 func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	retVal := InStockResponse{}
 	retVal.SetFromSettingsMap(self.data)
-	// path, _ := os.Getwd()
-	// path = path + "/html/index.html"
-	//hpage, _ := ioutil.ReadFile(path)
-	homeTempl := template.Must(template.New("").Parse(homehtml))
+
+	homeTempl := template.Must(template.New("").Parse(string(box.Get("/home.html"))))
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
@@ -69,13 +73,16 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	jsonByte, _ := json.Marshal(retVal.Data)
 	var v = struct {
-		Data     []ItemResponse
-		DataJson string
-	}{Data: retVal.Data, DataJson: string(jsonByte)}
+		Data         []ItemResponse
+		TimeInterval int
+		DataJson     string
+	}{Data: retVal.Data, DataJson: string(jsonByte), TimeInterval: int(self.data.Delayseconds)}
 	homeTempl.Execute(w, &v)
+
 }
 
 func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +90,7 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 	// path, _ := os.Getwd()
 	// path = path + "/html/AddItem.html"
 	// apage, _ := ioutil.ReadFile(path)
-	homeTempl := template.Must(template.New("").Parse(addItemHtml))
+	homeTempl := template.Must(template.New("").Parse(string(box.Get("/AddItem.html"))))
 	//homeTempl := template.Must(template.New("").Parse(string(apage)))
 	if r.URL.Path != "/add" {
 		http.Error(w, "Not found", http.StatusNotFound)
@@ -121,6 +128,7 @@ func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.Router = mux.NewRouter().StrictSlash(true)
 	self.Router.HandleFunc("/api/items", self.GetInStockItems)
 	self.Router.HandleFunc("/", self.ServeHome)
+	self.Router.HandleFunc("/favicon.ico", self.ServeFavicon)
 	self.Router.HandleFunc("/about", self.ServeAbout)
 	self.Router.HandleFunc("/add", self.ServeAddItem)
 

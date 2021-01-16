@@ -1,8 +1,6 @@
 {
     "delayseconds" : 30,
     "useragent" : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
-    "host":"localhost",
-    "port":"3000",
     "discord":"",
     "urls" : [
      {"item":"6800xt xfx","url":"https://www.bestbuy.com/site/xfx-amd-radeon-rx-6800xt-16gb-gddr6-pci-express-4-0-gaming-graphics-card-black/6441226.p?skuId=6441226"},

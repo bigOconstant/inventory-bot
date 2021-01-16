@@ -28,8 +28,6 @@ type Settings struct {
 	Delayseconds int64  `json:"delayseconds"`
 	Useragent    string `json:"useragent"`
 	Urls         []Urls `json:"urls"`
-	Host         string `json:"host"`
-	Port         string `json:"port"`
 	Discord      string `json:"discord"`
 }
 
@@ -37,6 +35,7 @@ type Settings struct {
 type URLMutex struct {
 	mu      sync.Mutex
 	URL     string
+	Id      int
 	InStock bool
 	Name    string
 }
@@ -58,10 +57,9 @@ func (u *URLMutex) SetFromUrls(input Urls) {
 }
 
 type SettingsMap struct {
+	mu           sync.Mutex
 	Delayseconds int64
 	Useragent    string
-	Host         string
-	Port         string
 	Discord      string
 	Size         int
 	Items        map[int]*URLMutex
@@ -72,11 +70,9 @@ func (s *SettingsMap) FromSettings(input *Settings) {
 	s.Size = len(input.Urls)
 	s.Useragent = input.Useragent
 	s.Items = make(map[int]*URLMutex)
-	s.Host = input.Host
-	s.Port = input.Port
 	s.Discord = input.Discord
 	for i := 0; i < s.Size; i++ {
-		s.Items[i] = &URLMutex{}
+		s.Items[i] = &URLMutex{Id: i}
 		s.Items[i].SetFromUrls(input.Urls[i])
 	}
 }
@@ -91,6 +87,7 @@ func (s *SettingsMap) AddItem(name string, url string) {
 	defer s.Items[length].mu.Unlock()
 	s.Items[length].URL = url
 	s.Items[length].Name = name
+	s.Items[length].Id = length
 	s.Size++
 }
 
@@ -105,4 +102,12 @@ func (u *SettingsMap) ReadFromFile() {
 	json.Unmarshal([]byte(byteValue), &settings)
 	settingsFile.Close()
 	u.FromSettings(&settings)
+}
+
+func (u *SettingsMap) Lock() {
+	u.mu.Lock()
+}
+
+func (u *SettingsMap) Unlock() {
+	u.mu.Unlock()
 }

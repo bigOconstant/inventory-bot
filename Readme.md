@@ -12,10 +12,6 @@ Add items to urls section in settings.json. Three items are given as an example.
 
 **delayseconds**: delay in seconds between checks. Longer delays could lessen chances of a ip ban.
 
-**host**: host name to be used in the UI.
-
-**port**: port to be used in the UI.
-
 Each url is checked in a seperate thread.
 
 **useragent**: String to tell server what web browser you are using. Spoofing browser
