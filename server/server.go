@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"goinventory/models"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -82,10 +80,10 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 
 func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 
-	path, _ := os.Getwd()
-	path = path + "/html/AddItem.html"
-	apage, _ := ioutil.ReadFile(path)
-	homeTempl := template.Must(template.New("").Parse(string(apage)))
+	// path, _ := os.Getwd()
+	// path = path + "/html/AddItem.html"
+	// apage, _ := ioutil.ReadFile(path)
+	homeTempl := template.Must(template.New("").Parse(addItemHtml))
 	//homeTempl := template.Must(template.New("").Parse(string(apage)))
 	if r.URL.Path != "/add" {
 		http.Error(w, "Not found", http.StatusNotFound)
@@ -101,9 +99,15 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 		_, err := url.ParseRequestURI(r.FormValue("url"))
 		if err == nil {
 			self.data.AddItem(r.FormValue("iname"), r.FormValue("url"))
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 
 		} else {
 			fmt.Println("invalid url")
+			var errMessage = struct {
+				Data string
+			}{Data: "Invalid Url"}
+			homeTempl.Execute(w, errMessage)
+			return
 		}
 	}
 

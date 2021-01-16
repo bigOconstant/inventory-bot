@@ -110,7 +110,8 @@ tr:nth-child(even) {
     
     <h1 style="text-align:center;">Monitored Inventory</h1>
 
-  <p id="noneFoundMessage" style="display: none;color:red">No Items Found. Add some url's to settings.json</p>
+  
+  {{if .Data}} 
   <table id="tab">
     <tr>
       
@@ -130,7 +131,9 @@ tr:nth-child(even) {
     </tr>
     {{end}}
   </table>
-
+  {{else}} 
+  <p id="noneFoundMessage" style="text-align:center;color:red">No Items Found. Add some url's to settings.json or add a item in the nav bar</p>
+   {{end}}
   </div>
  
   
