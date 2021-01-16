@@ -86,6 +86,7 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 	path = path + "/html/AddItem.html"
 	apage, _ := ioutil.ReadFile(path)
 	homeTempl := template.Must(template.New("").Parse(string(apage)))
+	//homeTempl := template.Must(template.New("").Parse(string(apage)))
 	if r.URL.Path != "/add" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
