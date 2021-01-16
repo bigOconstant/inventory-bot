@@ -1,7 +1,7 @@
 # Inventory stock bot
 
 Tired of not being able to get a 6800xt, this bot will defeat all other slow python selenium bots.
-compiles to a single executable and needs only a single json file in it's directory to run run. 
+compiles to a single executable for easy deployment. All html and images are compiled within.  
 
 # How to use
 Add items to urls section in settings.json. Three items are given as an example. Currently it just parses the page for a "add to cart" string.
