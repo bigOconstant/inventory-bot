@@ -1,4 +1,6 @@
-.PHONY: generate
+.buildall: all
+all:build 
+
 
 generate:
 	@go generate ./...
