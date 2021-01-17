@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="common.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+
+
+<title >Settings</title>
+</head>
+  <body>
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/add" >Add Item</a>
+        <a href="/about">About</a>
+        <a class="settings active" >&#9881;</a>
+      </div>
+    <div id="container">
+      <h1>Settings</h1>
+      {{if .Updated}} 
+        <p class="success">&#10003; Updated Successfully</p>
+      {{end}}
+      <form  action="/settings" method="POST">
+        <label for="irefreshinterval">Refresh Interval</label><br>
+        <input type="number" id="irefreshinterval" name="irefreshinterval" value="{{.Delayseconds}}"><br>
+        <label for="idiscord">Discord Webhook</label><br>
+        <input type="text" id="idiscord" name="idiscord" value="{{.Discord}}"> <br>
+        <label for="iuseragent">User Agent</label><br>
+        <input type="text" id="iuseragent" name="iuseragent" value="{{.Useragent}}"> <br><br>
+        <input type="submit" value="Submit">
+     </form>
+     <p class="info">Settings changes are not persisted new deployments. Add these to your settings.json to be permanent</p>
+    </div>
+      <img src="/favicon.ico">
+      <div id="footer">Caleb McCarthy 2021.</div>
+</body>
+
+</html>

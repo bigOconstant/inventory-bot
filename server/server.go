@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -64,6 +65,44 @@ func (self *Server) ServeFavicon(w http.ResponseWriter, r *http.Request) {
 func (self *Server) ServeCSS(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/css; charset=utf-8")
 	w.Write(box.Get("/common.css"))
+
+}
+
+func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
+
+	settingsTemplate := template.Must(template.New("").Parse(string(box.Get("/settings.html"))))
+
+	if r.Method == "GET" {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		var settings models.SettingsUpdate = models.SettingsUpdate{
+			Delayseconds: self.data.Delayseconds,
+			Useragent:    self.data.Useragent,
+			Discord:      self.data.Discord,
+			Updated:      false,
+		}
+		settingsTemplate.Execute(w, settings)
+	} else if r.Method == "POST" {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		r.ParseForm()
+
+		i, err := strconv.Atoi(r.FormValue("irefreshinterval"))
+		if err != nil || i < 0 {
+			i = int(self.data.Delayseconds)
+		}
+
+		var update models.SettingsUpdate = models.SettingsUpdate{
+			Delayseconds: int64(i),
+			Useragent:    r.FormValue("iuseragent"),
+			Discord:      r.FormValue("idiscord"),
+			Updated:      true,
+		}
+		self.data.UpdateFromSettingsUpdate(&update)
+
+		settingsTemplate.Execute(w, update)
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 
 }
 func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +177,7 @@ func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.Router.HandleFunc("/about", self.ServeAbout)
 	self.Router.HandleFunc("/add", self.ServeAddItem)
 	self.Router.HandleFunc("/common.css", self.ServeCSS)
+	self.Router.HandleFunc("/settings", self.ServeSettings)
 
 	log.Fatal(http.ListenAndServe(":"+port, self.Router))
 }

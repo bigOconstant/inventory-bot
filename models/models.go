@@ -31,6 +31,13 @@ type Settings struct {
 	Discord      string `json:"discord"`
 }
 
+type SettingsUpdate struct {
+	Delayseconds int64
+	Useragent    string
+	Discord      string
+	Updated      bool
+}
+
 //Url struct
 type URLMutex struct {
 	mu      sync.Mutex
@@ -63,6 +70,14 @@ type SettingsMap struct {
 	Discord      string
 	Size         int
 	Items        map[int]*URLMutex
+}
+
+func (s *SettingsMap) UpdateFromSettingsUpdate(su *SettingsUpdate) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.Delayseconds = su.Delayseconds
+	s.Discord = su.Discord
+	s.Useragent = su.Useragent
 }
 
 func (s *SettingsMap) FromSettings(input *Settings) {

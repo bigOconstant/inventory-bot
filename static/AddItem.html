@@ -8,30 +8,7 @@
 
 
 
-input[type=text] {
-  width:100%;
-  height: 25px;
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-label {
-  font-weight: bold;
-}
 
-input[type=submit] {
-  background-color: rgb(97, 76, 174); /* Green */
-  border: none;
-  color: white;
-  padding: 10px 26px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 12px;
-  margin: 2px 2px;
-  cursor: pointer;
-  -webkit-appearance: none;
-   border-radius: 0;
-}
 
 
 </style>
@@ -41,6 +18,7 @@ input[type=submit] {
     <a  href="/">Home</a>
     <a class="active" >Add Item</a>
     <a href="/about">About</a>
+    <a class="settings" href="/settings">&#9881;</a>
   </div> 
   <body >
     <div id="container">
@@ -52,9 +30,9 @@ input[type=submit] {
         <label for="url">Url</label><br>
         <input type="text" id="url" name="url" value=""> <br><br>
         <input type="submit" value="Submit">
-      </form>
+     </form>
 
-      <p class="info">Items added are not persisted. Add items to settings.json to persist.</p>
+      <p class="info">Items added are not persisted on new deployments. Add items to settings.json to persist.</p>
     </div>
     <img src="/favicon.ico">
       <div id="footer">Caleb McCarthy 2021</div>
