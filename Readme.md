@@ -83,3 +83,16 @@ I forward 3000 to port 80 for deployment on my raspberrypi. so I don't need to s
 
 Work on a few important one off parsers for pages like https://www.amd.com/en/direct-buy/us where stock pops in for multiple items at a time. 
 Will likely need https://pkg.go.dev/golang.org/x/net/html
+
+
+## Screenshots
+
+![screenshot1](screenshots/screenshot1.png?raw=true "screenshot1")
+
+![screenshot2](screenshots/screenshot2.png?raw=true "screenshot2")
+
+![screenshot3](screenshots/screenshot3.png?raw=true "screenshot3")
+
+![screenshot4](screenshots/screenshot4.png?raw=true "screenshot4")
+
+
