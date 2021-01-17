@@ -35,9 +35,10 @@ Each url is checked in a seperate thread.
 
 ```
 
-## How to run
+## How to run manually (requires golang and make)
 
 `make`
+
 `./goinventory <Port>`
 
 Open up the UI on `localhost:Port`
