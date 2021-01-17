@@ -37,7 +37,8 @@ Each url is checked in a seperate thread.
 
 ## How to run
 
-`go run main.go <Port>`
+`make`
+`./goinventory <Port>`
 
 Open up the UI on `localhost:Port`
 
@@ -55,6 +56,8 @@ UI refreshes every 1 second and updates the table with all the items. If an item
 
 ```bash
 
+docker build -t goinventory .;
+
 docker run -d \
   -it \
   -p 3000:3000 \
@@ -63,7 +66,7 @@ docker run -d \
   
 ```
 
-## Run in docker-compose (one line)
+## Run in docker-compose (Suggested method) (one line)
 
 `docker-compose up -d`
 
