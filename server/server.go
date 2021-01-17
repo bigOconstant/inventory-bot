@@ -60,6 +60,12 @@ func (self *Server) ServeFavicon(w http.ResponseWriter, r *http.Request) {
 	w.Write(box.Get("/favicon.ico"))
 
 }
+
+func (self *Server) ServeCSS(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/css; charset=utf-8")
+	w.Write(box.Get("/common.css"))
+
+}
 func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	retVal := InStockResponse{}
 	retVal.SetFromSettingsMap(self.data)
@@ -131,6 +137,7 @@ func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.Router.HandleFunc("/favicon.ico", self.ServeFavicon)
 	self.Router.HandleFunc("/about", self.ServeAbout)
 	self.Router.HandleFunc("/add", self.ServeAddItem)
+	self.Router.HandleFunc("/common.css", self.ServeCSS)
 
 	log.Fatal(http.ListenAndServe(":"+port, self.Router))
 }

@@ -18,6 +18,23 @@ Each url is checked in a seperate thread.
 
 **discord**: Optional field. If given a discord webhook a message will be sent to the webhook channel informing of in stock items.
 
+## Example settings.json
+
+```json
+
+{
+    "delayseconds" : 30,
+    "useragent" : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
+    "discord":"",
+    "urls" : [
+     {"item":"6800xt xfx","url":"https://www.bestbuy.com/site/xfx-amd-radeon-rx-6800xt-16gb-gddr6-pci-express-4-0-gaming-graphics-card-black/6441226.p?skuId=6441226"},
+     {"item":"6800xt msi-radeon","url": "https://www.bestbuy.com/site/msi-radeon-rx-6800-xt-16g-16gb-gddr6-pci-express-4-0-graphics-card-black-black/6440913.p?skuId=6440913"},
+     {"item":"new egg 6800xt other","url":"https://www.newegg.com/gigabyte-radeon-rx-6800-xt-gv-r68xt-16gc-b/p/N82E16814932373?"}
+    ]
+}
+
+```
+
 ## How to run
 
 `go run main.go <Port>`
