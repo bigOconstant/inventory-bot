@@ -51,13 +51,11 @@ UI refreshes every 1 second and updates the table with all the items. If an item
 
 **build**
 
-`docker build -t goinventory`
+`docker build -t goinventory .`
 
 **Run**
 
 ```bash
-
-docker build -t goinventory .;
 
 docker run -d \
   -it \
