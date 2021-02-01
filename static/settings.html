@@ -26,6 +26,12 @@
         <input type="text" id="idiscord" name="idiscord" value="{{.Discord}}"> <br>
         <label for="iuseragent">User Agent</label><br>
         <input type="text" id="iuseragent" name="iuseragent" value="{{.Useragent}}"> <br><br>
+        <label for="enabled">Enabled Monitoring</label><br>
+        {{if .Enabled}}
+        <input type="checkbox" name="enabled"  checked ><br>
+        {{else}}
+        <input type="checkbox" name="enabled"  ><br>
+        {{end}}
         <input type="submit" value="Update">
      </form>
      <p class="info">Settings changes are not persisted new deployments. Add these to your settings.json to be permanent</p>

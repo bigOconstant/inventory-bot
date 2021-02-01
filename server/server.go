@@ -78,6 +78,7 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 			Delayseconds: self.data.Delayseconds,
 			Useragent:    self.data.Useragent,
 			Discord:      self.data.Discord,
+			Enabled:      self.data.Enabled,
 			Updated:      false,
 		}
 		settingsTemplate.Execute(w, settings)
@@ -87,14 +88,21 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 
 		i, err := strconv.Atoi(r.FormValue("irefreshinterval"))
+
 		if err != nil || i < 0 {
 			i = int(self.data.Delayseconds)
+		}
+		enabled := r.FormValue("enabled")
+		enabledBool := false
+		if enabled == "on" {
+			enabledBool = true
 		}
 
 		var update models.SettingsUpdate = models.SettingsUpdate{
 			Delayseconds: int64(i),
 			Useragent:    r.FormValue("iuseragent"),
 			Discord:      r.FormValue("idiscord"),
+			Enabled:      enabledBool,
 			Updated:      true,
 		}
 		self.data.UpdateFromSettingsUpdate(&update)
@@ -125,7 +133,8 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 		Data         []ItemResponse
 		TimeInterval int
 		DataJson     string
-	}{Data: retVal.Data, DataJson: string(jsonByte), TimeInterval: int(self.data.Delayseconds)}
+		Enabled      bool
+	}{Data: retVal.Data, DataJson: string(jsonByte), TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled}
 	homeTempl.Execute(w, &v)
 
 }

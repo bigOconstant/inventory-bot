@@ -31,14 +31,18 @@ func main() {
 
 	// Main loop that checks stock and sleeps a given duration.
 	for true {
+		if data.Enabled {
+			for _, item := range data.Items {
+				wg.Add(1)
+				go components.CheckStock(wg, data.Useragent, item, discord)
+			}
 
-		for _, item := range data.Items {
-			wg.Add(1)
-			go components.CheckStock(wg, data.Useragent, item, discord)
+			wg.Wait()
+			time.Sleep(time.Duration(data.Delayseconds) * time.Second)
+		} else {
+			// Just sleep a while so it's not constantly checking
+			time.Sleep(time.Duration(2 * time.Second))
 		}
-
-		wg.Wait()
-		time.Sleep(time.Duration(data.Delayseconds) * time.Second)
 
 	}
 	fmt.Println("Main: Completed")

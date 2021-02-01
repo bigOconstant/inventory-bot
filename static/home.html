@@ -46,7 +46,8 @@ tr:nth-child(even) {
     <h1>Monitored Inventory</h1>
 
   
-  {{if .Data}} 
+  {{if .Data }} 
+  {{if .Enabled}}
   <table id="tab">
     <tr>
       
@@ -71,11 +72,17 @@ tr:nth-child(even) {
       
     </tr>
     {{end}}
+    {{end}}
   </table>
-
+  {{if .Enabled}}
   <div class="info">
     {{.TimeInterval}} Second Refresh Interval
   </div>
+  {{else}}
+  <div class="info">
+    Monitoring Disabled. Enable in settings.
+  </div>
+  {{end}}
 
   {{else}} 
   <p id="noneFoundMessage" style="text-align:center;color:red">No Items Found. Add some url's to settings.json or add a item in the nav bar</p>

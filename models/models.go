@@ -36,6 +36,7 @@ type SettingsUpdate struct {
 	Useragent    string
 	Discord      string
 	Updated      bool
+	Enabled      bool
 }
 
 //Url struct
@@ -69,6 +70,7 @@ type SettingsMap struct {
 	Useragent    string
 	Discord      string
 	Size         int
+	Enabled      bool
 	Items        map[int]*URLMutex
 }
 
@@ -78,6 +80,7 @@ func (s *SettingsMap) UpdateFromSettingsUpdate(su *SettingsUpdate) {
 	s.Delayseconds = su.Delayseconds
 	s.Discord = su.Discord
 	s.Useragent = su.Useragent
+	s.Enabled = su.Enabled
 }
 
 func (s *SettingsMap) FromSettings(input *Settings) {
@@ -86,6 +89,7 @@ func (s *SettingsMap) FromSettings(input *Settings) {
 	s.Useragent = input.Useragent
 	s.Items = make(map[int]*URLMutex)
 	s.Discord = input.Discord
+	s.Enabled = true
 	for i := 0; i < s.Size; i++ {
 		s.Items[i] = &URLMutex{Id: i}
 		s.Items[i].SetFromUrls(input.Urls[i])
