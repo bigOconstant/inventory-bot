@@ -22,6 +22,7 @@ func main() {
 
 	data := models.SettingsMap{}
 	data.ReadFromFile()
+
 	discord := components.Discord{Webhook: data.Discord}
 	server := server.Server{}
 	go server.Serve(&data, port)

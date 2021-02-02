@@ -28,6 +28,7 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 	if err != nil {
 		println("Error calling do!")
 		println(err.Error())
+		return
 	}
 	defer resp.Body.Close()
 
@@ -40,11 +41,14 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 		println(err.Error())
 
 	}
-
-	if strings.Contains(strings.ToUpper((string(body))), "ADD TO CART") {
+	// Hack for  stupid best buy comment messing up the algo
+	//When you see add to cart, just be patient
+	//WHEN YOU SEE ADD TO CART, JUST BE PATIENT
+	if strings.Contains(strings.ToUpper((string(body))), "ADD TO CART") && !strings.Contains((string(body)), "When you see add to cart, just be patient") {
 
 		if !url.InStock {
 			fmt.Println("in stock")
+			fmt.Println(string(body))
 			discord.SendNotification(url.Name + " in stock go to " + url.URL + " now")
 			url.SetStock(true)
 		}

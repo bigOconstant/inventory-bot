@@ -25,8 +25,8 @@ tr:nth-child(even) {
   background-color: #dddddd;
 }
 
-.ten {
-  width: 10%;
+.five {
+  width: 5%;
 }
 
 </style>
@@ -52,7 +52,7 @@ tr:nth-child(even) {
     <tr>
       
       <th>Name</th>
-      <th >In Stock</th>
+      <th colspan="2" >In Stock</th>
       
     </tr>
   
@@ -61,12 +61,19 @@ tr:nth-child(even) {
        <td>
          <a href="{{.Url}}"> {{.Name}} <a></a>
        </td>
-       <td >
-        {{if not .InStock}}
+       <td class="five">
+        <p style="float:left;">{{if not .InStock}}
         No
         {{else}}
         Yes
         {{end}}
+          </p>
+       </td>
+       <td class="five">
+        <form action="/" method="post" id="form{{.Id}}">
+          <input type="hidden" id="form{{.Id}}" name="{{.Id}}" value="{{.Id}}"> 
+          </form>
+          <button title="delete" style="float:right;" type="submit" form="form{{.Id}}" value="Submit">&#8722;</button>
        </td>
       
       
@@ -120,37 +127,7 @@ function ClearTable() {
     while(--rowCount) myTable.deleteRow(rowCount);
 }
 
-function CreateTable(inStock) {
-    if(inStock.data.length <1){
-      SetTableDisplay(false);
-    }else{
-      SetTableDisplay(true);
-    }
-    var table = document.getElementById("tab");
 
-    inStockCount = 0;
-
-    for(var i = 0; i < inStock.data.length; ++i) {
-        var row = table.insertRow(table.rows.length);
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-       
-        
-
-        cell1.innerHTML = '<a href="'+inStock.data[i].url+'">'+ inStock.data[i].name+'<a>';
-        cell2.innerHTML = inStock.data[i].instock
-        if(inStock.data[i].instock ){
-          ++inStockCount;
-          alert(inStock.data[i].name+" in stock!\n"+inStock.data[i].url);
-        }
-        
-    }
-    if(inStockCount > 0) {
-      document.title = "("+inStockCount+")"+" Admin Page"; 
-    }else{
-      document.title = "Admin Page"; 
-    }
-}
 
 function compareTwo(oldTable,newTable){
   if(!oldTable.data || !newTable.data|| oldTable.data.length !== newTable.data.length){
@@ -167,26 +144,15 @@ function compareTwo(oldTable,newTable){
 }
 
 function UpdateTable(){
-
-fetch(window.location.href+'/api/items')
-  .then(response => response.json())
-  .then(data => {
-    compareTwo
-    
-    // only Update Table if it has changed
-    if(compareTwo(tableData,data)){
-
-      tableData = data
-      
-      ClearTable();
-      CreateTable(data);
-    }
-
-    
-  });
-
-  setTimeout(UpdateTable, 2000);
-}
+  fetch(window.location.href+'/api/items')
+    .then(response => response.json())
+    .then(data => {
+      if(compareTwo(tableData,data)){
+        location.reload();
+      }
+    });
+    setTimeout(UpdateTable, 2000);
+  }
   
 UpdateTable();
 

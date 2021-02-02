@@ -113,19 +113,33 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
 func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
-	retVal := InStockResponse{}
-	retVal.SetFromSettingsMap(self.data)
 
 	homeTempl := template.Must(template.New("").Parse(string(box.Get("/home.html"))))
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
-	if r.Method != "GET" {
+	if r.Method != "GET" && r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	if r.Method == "POST" {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		r.ParseForm()
+		for _, values := range r.Form { // range over map
+			for _, value := range values { // range over []string
+				id, err := strconv.Atoi(value)
+				if err == nil {
+					self.data.RemoveID(id)
+				}
+			}
+		}
+	}
+	retVal := InStockResponse{}
+	retVal.SetFromSettingsMap(self.data)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	jsonByte, _ := json.Marshal(retVal.Data)

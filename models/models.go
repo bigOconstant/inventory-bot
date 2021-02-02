@@ -74,6 +74,24 @@ type SettingsMap struct {
 	Items        map[int]*URLMutex
 }
 
+//RemoveID removes an item from the map
+func (s *SettingsMap) RemoveID(id int) {
+	// s.mu.Lock()
+	// defer s.mu.Unlock()
+	if s.Size < 1 {
+		return
+	}
+	if s.Size > 1 {
+		for i := 0; i < s.Size-1; i++ {
+			if i >= id {
+				s.Items[i] = s.Items[i+1]
+			}
+		}
+	}
+	delete(s.Items, s.Size)
+	s.Size--
+}
+
 func (s *SettingsMap) Clone() *SettingsMap {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -136,7 +154,11 @@ func (u *SettingsMap) ReadFromFile() {
 	settingsFile, err := os.Open("settings.json")
 	settings := Settings{}
 	if err != nil {
+		settings.Useragent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+		settings.Delayseconds = 30
+		u.FromSettings(&settings)
 		fmt.Println(err)
+		return
 	}
 
 	byteValue, _ := ioutil.ReadAll(settingsFile)
