@@ -32,16 +32,16 @@ func main() {
 	// Main loop that checks stock and sleeps a given duration.
 	for true {
 		if data.Enabled {
-			for _, item := range data.Items {
+			clone := data.Clone()
+			for _, item := range clone.Items {
 				wg.Add(1)
-				go components.CheckStock(wg, data.Useragent, item, discord)
+				go components.CheckStock(wg, clone.Useragent, item, discord)
 			}
 
 			wg.Wait()
-			time.Sleep(time.Duration(data.Delayseconds) * time.Second)
-		} else {
-			// Just sleep a while so it's not constantly checking
-			time.Sleep(time.Duration(2 * time.Second))
+
+			time.Sleep(time.Duration(clone.Delayseconds) * time.Second)
+			data.Update(clone)
 		}
 
 	}

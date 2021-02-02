@@ -74,6 +74,28 @@ type SettingsMap struct {
 	Items        map[int]*URLMutex
 }
 
+func (s *SettingsMap) Clone() *SettingsMap {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	retVal := SettingsMap{Size: s.Size, Delayseconds: s.Delayseconds, Useragent: s.Useragent, Discord: s.Discord, Enabled: s.Enabled}
+
+	retVal.Items = make(map[int]*URLMutex, s.Size)
+	for i := 0; i < s.Size; i++ {
+		retVal.Items[i] = &URLMutex{URL: s.Items[i].URL, Name: s.Items[i].Name, Id: s.Items[i].Id, InStock: s.Items[i].InStock}
+	}
+	return &retVal
+}
+
+func (old *SettingsMap) Update(new *SettingsMap) {
+	for _, newurl := range new.Items {
+		for _, oldurl := range old.Items {
+			if newurl.Name == oldurl.Name && newurl.URL == oldurl.URL {
+				oldurl.InStock = newurl.InStock
+			}
+		}
+	}
+}
+
 func (s *SettingsMap) UpdateFromSettingsUpdate(su *SettingsUpdate) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
