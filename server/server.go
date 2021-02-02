@@ -26,15 +26,17 @@ type InStockResponse struct {
 }
 
 func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
-	r.Data = make([]ItemResponse, input.Size)
+	input.Lock()
+	r.Data = make([]ItemResponse, len(input.Items))
 
-	for i := 0; i < input.Size; i++ {
+	for i := 0; i < len(input.Items); i++ {
 
 		r.Data[i].Id = i
 		r.Data[i].Name = input.Items[i].Name
 		r.Data[i].Url = input.Items[i].URL
 		r.Data[i].InStock = input.Items[i].InStock
 	}
+	input.Unlock()
 }
 
 type Server struct {

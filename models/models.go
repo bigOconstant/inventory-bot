@@ -69,46 +69,48 @@ type SettingsMap struct {
 	Delayseconds int64
 	Useragent    string
 	Discord      string
-	Size         int
 	Enabled      bool
 	Items        map[int]*URLMutex
 }
 
 //RemoveID removes an item from the map
 func (s *SettingsMap) RemoveID(id int) {
-	// s.mu.Lock()
-	// defer s.mu.Unlock()
-	if s.Size < 1 {
-		return
-	}
-	if s.Size > 1 {
-		for i := 0; i < s.Size-1; i++ {
-			if i >= id {
-				s.Items[i] = s.Items[i+1]
-			}
+
+	newItems := make(map[int]*URLMutex, len(s.Items))
+
+	iterator := 0
+
+	for i, item := range s.Items {
+		if i != id {
+			newItems[iterator] = item
+			iterator++
 		}
 	}
-	delete(s.Items, s.Size)
-	s.Size--
+	s.Items = nil
+	s.Items = newItems
+
 }
 
 func (s *SettingsMap) Clone() *SettingsMap {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	retVal := SettingsMap{Size: s.Size, Delayseconds: s.Delayseconds, Useragent: s.Useragent, Discord: s.Discord, Enabled: s.Enabled}
+	retVal := SettingsMap{Delayseconds: s.Delayseconds, Useragent: s.Useragent, Discord: s.Discord, Enabled: s.Enabled}
 
-	retVal.Items = make(map[int]*URLMutex, s.Size)
-	for i := 0; i < s.Size; i++ {
+	retVal.Items = make(map[int]*URLMutex, len(s.Items))
+	for i := 0; i < len(s.Items); i++ {
 		retVal.Items[i] = &URLMutex{URL: s.Items[i].URL, Name: s.Items[i].Name, Id: s.Items[i].Id, InStock: s.Items[i].InStock}
 	}
 	return &retVal
 }
 
 func (old *SettingsMap) Update(new *SettingsMap) {
+
 	for _, newurl := range new.Items {
 		for _, oldurl := range old.Items {
 			if newurl.Name == oldurl.Name && newurl.URL == oldurl.URL {
+				//oldurl.mu.Lock()
 				oldurl.InStock = newurl.InStock
+				//oldurl.mu.Unlock()
 			}
 		}
 	}
@@ -125,29 +127,34 @@ func (s *SettingsMap) UpdateFromSettingsUpdate(su *SettingsUpdate) {
 
 func (s *SettingsMap) FromSettings(input *Settings) {
 	s.Delayseconds = input.Delayseconds
-	s.Size = len(input.Urls)
 	s.Useragent = input.Useragent
 	s.Items = make(map[int]*URLMutex)
 	s.Discord = input.Discord
 	s.Enabled = true
-	for i := 0; i < s.Size; i++ {
+	for i := 0; i < len(input.Urls); i++ {
 		s.Items[i] = &URLMutex{Id: i}
 		s.Items[i].SetFromUrls(input.Urls[i])
 	}
 }
 
 func (s *SettingsMap) AddItem(name string, url string) {
-	length := len(s.Items)
+
+	newItems := make(map[int]*URLMutex, len(s.Items)+1)
+
+	i := 0
+	for _, item := range s.Items {
+		newItems[i] = item
+		i++
+	}
+
 	var UrlModel Urls = Urls{Item: name, URL: url}
-	urlMutex := URLMutex{}
-	urlMutex.SetFromUrls(UrlModel)
-	s.Items[length] = &urlMutex
-	s.Items[length].mu.Lock()
-	defer s.Items[length].mu.Unlock()
-	s.Items[length].URL = url
-	s.Items[length].Name = name
-	s.Items[length].Id = length
-	s.Size++
+
+	um := URLMutex{}
+	um.SetFromUrls(UrlModel)
+	s.Items = nil
+	newItems[i] = &um
+	s.Items = newItems
+
 }
 
 func (u *SettingsMap) ReadFromFile() {

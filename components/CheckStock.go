@@ -48,7 +48,6 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 
 		if !url.InStock {
 			fmt.Println("in stock")
-			fmt.Println(string(body))
 			discord.SendNotification(url.Name + " in stock go to " + url.URL + " now")
 			url.SetStock(true)
 		}
