@@ -7,3 +7,9 @@ type Settings struct {
 	Discord_webhook  string
 	Enabled          bool
 }
+
+type Item struct {
+	Id   int
+	Url  string
+	Name string
+}

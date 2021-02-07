@@ -31,12 +31,13 @@ func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
 	input.Lock()
 	r.Data = make([]ItemResponse, len(input.Items))
 
-	for i := 0; i < len(input.Items); i++ {
-
+	i := 0
+	for key := range input.Items {
 		r.Data[i].Id = i
-		r.Data[i].Name = input.Items[i].Name
-		r.Data[i].Url = input.Items[i].URL
-		r.Data[i].InStock = input.Items[i].InStock
+		r.Data[i].Name = input.Items[key].Name
+		r.Data[i].Url = input.Items[key].URL
+		r.Data[i].InStock = input.Items[key].InStock
+		i++
 	}
 	input.Unlock()
 }
@@ -187,6 +188,9 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		_, err := url.ParseRequestURI(r.FormValue("url"))
 		if err == nil {
+			db := sqlite.Sqlite{}
+			id, err := db.SaveItem(r.FormValue("iname"), r.FormValue("url"))
+			fmt.Println("new id :", id, " err:", err)
 			self.data.AddItem(r.FormValue("iname"), r.FormValue("url"))
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 

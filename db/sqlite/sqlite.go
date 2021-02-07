@@ -12,6 +12,8 @@ import (
 type SqliteI interface {
 	Init() error
 	SaveSettings(settings dbmodels.Settings) error
+	SaveItem(name string, url string) (id int, err error)
+	GetItems() (items []dbmodels.Item, err error)
 	GetSettings() (settings dbmodels.Settings, err error)
 }
 
@@ -93,11 +95,64 @@ func (s *Sqlite) Init() (err error) {
 
 	return nil
 }
+func (s *Sqlite) SaveItem(name string, url string) (id int, err error) {
+	db, err := sql.Open("sqlite3", "./inventory.db")
+	if err != nil {
+		fmt.Println("error opening db")
+		log.Printf("%q\n", err)
+		return
+	}
+	defer db.Close()
+
+	insertstmt := `
+			INSERT INTO Items (url,item) VALUES (?,?)
+	`
+	stmt, err := db.Prepare(insertstmt)
+	defer stmt.Close()
+	inserted, err := stmt.Exec(&url, &name)
+	if err != nil {
+		fmt.Println("error inserting")
+		log.Printf("%q\n", err)
+		return
+	}
+
+	id64, err := inserted.LastInsertId()
+	id = int(id64)
+	if err != nil {
+		log.Printf("%q\n", err)
+		return
+	}
+	return
+}
+
+func (s *Sqlite) GetItems() (items []dbmodels.Item, err error) {
+	db, err := sql.Open("sqlite3", "./inventory.db")
+	items = make([]dbmodels.Item, 0)
+	if err != nil {
+		fmt.Println("error opening db")
+		log.Fatal(err)
+	}
+	defer db.Close()
+	query := "SELECT id,url,item FROM Items;"
+	rows, err := db.Query(query)
+	defer rows.Close()
+	for rows.Next() {
+		item := dbmodels.Item{}
+		err = rows.Scan(&item.Id, &item.Url, &item.Name)
+		if err != nil {
+			log.Println("error", err)
+			continue
+		} else {
+			items = append(items, item)
+		}
+	}
+	return
+}
 
 func (s *Sqlite) GetSettings() (settings dbmodels.Settings, err error) {
 	db, err := sql.Open("sqlite3", "./inventory.db")
 	if err != nil {
-		fmt.Println("error preparing")
+		fmt.Println("error opening db")
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -114,7 +169,7 @@ func (s *Sqlite) GetSettings() (settings dbmodels.Settings, err error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(settings)
+
 	}
 	return
 }

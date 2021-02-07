@@ -23,13 +23,9 @@ func main() {
 	}
 
 	data := models.SettingsMap{}
-	data.ReadFromFile()
+	//data.ReadFromFile()
 
-	settings, _ := db.GetSettings()
-	data.Delayseconds = int64(settings.Refresh_interval)
-	data.Discord = settings.Discord_webhook
-	data.Enabled = settings.Enabled
-	data.Useragent = settings.User_agent
+	data.LoadFromDB(&db)
 
 	discord := components.Discord{Webhook: data.Discord}
 	server := server.Server{}

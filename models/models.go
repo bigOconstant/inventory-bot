@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"goinventory/db/sqlite"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -97,8 +98,8 @@ func (s *SettingsMap) Clone() *SettingsMap {
 	retVal := SettingsMap{Delayseconds: s.Delayseconds, Useragent: s.Useragent, Discord: s.Discord, Enabled: s.Enabled}
 
 	retVal.Items = make(map[int]*URLMutex, len(s.Items))
-	for i := 0; i < len(s.Items); i++ {
-		retVal.Items[i] = &URLMutex{URL: s.Items[i].URL, Name: s.Items[i].Name, Id: s.Items[i].Id, InStock: s.Items[i].InStock}
+	for key, _ := range s.Items {
+		retVal.Items[key] = &URLMutex{URL: s.Items[key].URL, Name: s.Items[key].Name, Id: s.Items[key].Id, InStock: s.Items[key].InStock}
 	}
 	return &retVal
 }
@@ -172,6 +173,23 @@ func (u *SettingsMap) ReadFromFile() {
 	json.Unmarshal([]byte(byteValue), &settings)
 	settingsFile.Close()
 	u.FromSettings(&settings)
+}
+
+func (U *SettingsMap) LoadFromDB(db *sqlite.Sqlite) {
+	settings, _ := db.GetSettings()
+	U.Delayseconds = int64(settings.Refresh_interval)
+	U.Discord = settings.Discord_webhook
+	U.Enabled = settings.Enabled
+	U.Useragent = settings.User_agent
+	U.Items = nil
+	U.Items = make(map[int]*URLMutex)
+	items, err := db.GetItems()
+	if err == nil {
+		for _, item := range items {
+			var u URLMutex = URLMutex{URL: item.Url, Name: item.Name, InStock: false}
+			U.Items[item.Id] = &u
+		}
+	}
 }
 
 func (u *SettingsMap) Lock() {
