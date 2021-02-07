@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"goinventory/components"
+	"goinventory/db/sqlite"
 	"goinventory/models"
 	"goinventory/server"
 	"os"
@@ -11,7 +12,8 @@ import (
 )
 
 func main() {
-
+	var db sqlite.Sqlite
+	db.Init()
 	port := "3000"
 	if len(os.Args) < 2 {
 		fmt.Println("Port not specified, defaulting to 3000")
