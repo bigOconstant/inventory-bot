@@ -12,6 +12,7 @@ import (
 type SqliteI interface {
 	Init() error
 	SaveSettings(settings dbmodels.Settings) error
+	GetSettings() (settings dbmodels.Settings, err error)
 }
 
 type Sqlite struct {
@@ -91,6 +92,31 @@ func (s *Sqlite) Init() (err error) {
 	}
 
 	return nil
+}
+
+func (s *Sqlite) GetSettings() (settings dbmodels.Settings, err error) {
+	db, err := sql.Open("sqlite3", "./inventory.db")
+	if err != nil {
+		fmt.Println("error preparing")
+		log.Fatal(err)
+	}
+	defer db.Close()
+	query := `
+			select refresh_interval,
+			user_agent,
+			discord_webhook,
+			enabled from settings;
+	`
+	rows, err := db.Query(query)
+	defer rows.Close()
+	for rows.Next() {
+		err = rows.Scan(&settings.Refresh_interval, &settings.User_agent, &settings.Discord_webhook, &settings.Enabled)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(settings)
+	}
+	return
 }
 
 func (s *Sqlite) SaveSettings(settings dbmodels.Settings) (err error) {
