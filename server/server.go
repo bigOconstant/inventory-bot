@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"goinventory/db/dbmodels"
+	"goinventory/db/sqlite"
 	"goinventory/internal/box"
 	"goinventory/models"
 	"html/template"
@@ -108,6 +110,16 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 			Updated:      true,
 		}
 		self.data.UpdateFromSettingsUpdate(&update)
+
+		settingsUpdate := dbmodels.Settings{Id: 1,
+			Refresh_interval: int(update.Delayseconds),
+			User_agent:       update.Useragent,
+			Enabled:          update.Enabled,
+			Discord_webhook:  update.Discord}
+
+		fmt.Println(settingsUpdate)
+		db := sqlite.Sqlite{}
+		db.SaveSettings(settingsUpdate)
 
 		settingsTemplate.Execute(w, update)
 	} else {
