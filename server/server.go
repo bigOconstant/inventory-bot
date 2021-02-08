@@ -3,12 +3,15 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"goinventory/db/dbmodels"
+	"goinventory/db/sqlite"
 	"goinventory/internal/box"
 	"goinventory/models"
 	"html/template"
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -27,21 +30,27 @@ type InStockResponse struct {
 
 func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
 	input.Lock()
+	r.Data = nil
 	r.Data = make([]ItemResponse, len(input.Items))
 
-	for i := 0; i < len(input.Items); i++ {
-
-		r.Data[i].Id = i
-		r.Data[i].Name = input.Items[i].Name
-		r.Data[i].Url = input.Items[i].URL
-		r.Data[i].InStock = input.Items[i].InStock
+	i := 0
+	for key := range input.Items {
+		r.Data[i].Id = key
+		r.Data[i].Name = input.Items[key].Name
+		r.Data[i].Url = input.Items[key].URL
+		r.Data[i].InStock = input.Items[key].InStock
+		i++
 	}
+	sort.Slice(r.Data, func(i, j int) bool {
+		return r.Data[i].Name < r.Data[j].Name
+	})
 	input.Unlock()
 }
 
 type Server struct {
 	Router *mux.Router
 	data   *models.SettingsMap
+	DB     sqlite.SqliteI
 }
 
 func (self *Server) GetInStockItems(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +118,14 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 		}
 		self.data.UpdateFromSettingsUpdate(&update)
 
+		settingsUpdate := dbmodels.Settings{Id: 1,
+			Refresh_interval: int(update.Delayseconds),
+			User_agent:       update.Useragent,
+			Enabled:          update.Enabled,
+			Discord_webhook:  update.Discord}
+
+		self.DB.SaveSettings(settingsUpdate)
+
 		settingsTemplate.Execute(w, update)
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -116,9 +133,32 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
+func (self *Server) ServeTable(w http.ResponseWriter, r *http.Request) {
 
-	homeTempl := template.Must(template.New("").Parse(string(box.Get("/home.html"))))
+	tabletemplate := template.Must(template.New("retval").Parse(string(box.Get("/table.html"))))
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	retVal := InStockResponse{}
+	retVal.SetFromSettingsMap(self.data)
+	var v = struct {
+		Data []ItemResponse
+	}{Data: retVal.Data}
+	tabletemplate.Execute(w, &v)
+
+}
+
+func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
+	item := string(box.Get("/table.html"))
+
+	homeTempl := template.Must(template.New("table").Parse(item))
+
+	final, err := homeTempl.New("home").Parse(string(box.Get("/home.html")))
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
@@ -136,6 +176,10 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 				id, err := strconv.Atoi(value)
 				if err == nil {
 					self.data.RemoveID(id)
+					err := self.DB.DeleteItem(id)
+					if err != nil {
+						fmt.Println("error deleting:", err)
+					}
 				}
 			}
 		}
@@ -144,24 +188,17 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	retVal.SetFromSettingsMap(self.data)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	jsonByte, _ := json.Marshal(retVal.Data)
 	var v = struct {
 		Data         []ItemResponse
 		TimeInterval int
-		DataJson     string
 		Enabled      bool
-	}{Data: retVal.Data, DataJson: string(jsonByte), TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled}
-	homeTempl.Execute(w, &v)
-
+	}{Data: retVal.Data, TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled}
+	final.Execute(w, &v)
 }
 
 func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 
-	// path, _ := os.Getwd()
-	// path = path + "/html/AddItem.html"
-	// apage, _ := ioutil.ReadFile(path)
 	homeTempl := template.Must(template.New("").Parse(string(box.Get("/AddItem.html"))))
-	//homeTempl := template.Must(template.New("").Parse(string(apage)))
 	if r.URL.Path != "/add" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
@@ -175,7 +212,12 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		_, err := url.ParseRequestURI(r.FormValue("url"))
 		if err == nil {
-			self.data.AddItem(r.FormValue("iname"), r.FormValue("url"))
+			id, err := self.DB.SaveItem(r.FormValue("iname"), r.FormValue("url"))
+			if err == nil {
+				self.data.AddItem(r.FormValue("iname"), r.FormValue("url"), id)
+			} else {
+				fmt.Println("error:", err)
+			}
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 
 		} else {
@@ -196,6 +238,7 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.data = input
 	self.Router = mux.NewRouter().StrictSlash(true)
+	self.Router.HandleFunc("/api/table", self.ServeTable)
 	self.Router.HandleFunc("/api/items", self.GetInStockItems)
 	self.Router.HandleFunc("/", self.ServeHome)
 	self.Router.HandleFunc("/favicon.ico", self.ServeFavicon)

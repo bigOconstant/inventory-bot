@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"goinventory/components"
+	"goinventory/db/sqlite"
 	"goinventory/models"
 	"goinventory/server"
 	"os"
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	var db sqlite.Sqlite
+	db.Init()
+	defer db.Close()
 
 	port := "3000"
 	if len(os.Args) < 2 {
@@ -21,10 +25,11 @@ func main() {
 	}
 
 	data := models.SettingsMap{}
-	data.ReadFromFile()
+
+	data.LoadFromDB(&db)
 
 	discord := components.Discord{Webhook: data.Discord}
-	server := server.Server{}
+	server := server.Server{DB: &db}
 	go server.Serve(&data, port)
 
 	//allocate a single waitgroup

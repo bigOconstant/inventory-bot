@@ -1,3 +1,4 @@
 internal/box/blob.go
 main
 goinventory
+inventory.db

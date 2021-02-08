@@ -42,7 +42,6 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 
 	}
 	// Hack for  stupid best buy comment messing up the algo
-	//When you see add to cart, just be patient
 	//WHEN YOU SEE ADD TO CART, JUST BE PATIENT
 	if strings.Contains(strings.ToUpper((string(body))), "ADD TO CART") && !strings.Contains((string(body)), "When you see add to cart, just be patient") {
 
@@ -53,8 +52,6 @@ func CheckStock(wg *sync.WaitGroup, Useragent string, url *models.URLMutex, disc
 		}
 
 	} else {
-		//fmt.Println("not in stock setting")
-
 		if url.InStock {
 			fmt.Println("not in stock")
 			fmt.Println(url.Name, " not in stock now")

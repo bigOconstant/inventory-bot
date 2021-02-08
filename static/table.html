@@ -1,0 +1,32 @@
+<table id="tab">
+    <tr>
+      
+      <th>Name</th>
+      <th colspan="2" >In Stock</th>
+      
+    </tr>
+  
+     {{range .Data}}
+     <tr>
+       <td>
+         <a href="{{.Url}}"> {{.Name}} <a></a>
+       </td>
+       <td class="five">
+        <p style="float:left;">{{if not .InStock}}
+        No
+        {{else}}
+        Yes
+        {{end}}
+          </p>
+       </td>
+       <td class="five">
+        <form action="/" method="post" id="form{{.Id}}">
+          <input type="hidden" id="form{{.Id}}" name="{{.Id}}" value="{{.Id}}"> 
+          </form>
+          <button title="delete" style="float:right;" type="submit" form="form{{.Id}}" value="Submit">&#8722;</button>
+       </td>
+      
+      
+    </tr>
+    {{end}}
+  </table>

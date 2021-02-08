@@ -1,3 +1,6 @@
+
+
+
 ############################
 # STEP 1 build executable binary
 ############################
@@ -7,6 +10,7 @@ FROM golang:alpine AS builder
 RUN apk update && apk add --no-cache git
 RUN apk add --no-cache --upgrade bash
 RUN apk add --no-cache make 
+RUN apk add build-base
 
 
 RUN apk add -U --no-cache ca-certificates && update-ca-certificates
@@ -25,16 +29,14 @@ WORKDIR $GOPATH/src/mypacgoinventory/
 RUN make
 
 
-############################
-# STEP 2 build a small image
-############################
-FROM scratch
+###########################
+#STEP 2 build a small image
+###########################
+FROM  alpine:latest
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /app
 COPY --from=builder /go/src/mypacgoinventory/goinventory /app/goinventory
 # Run the hello binary.
 
-COPY settings.json .
-
-
 ENTRYPOINT ["/app/goinventory"]
+

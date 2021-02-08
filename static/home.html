@@ -44,43 +44,16 @@ tr:nth-child(even) {
   <div id="container">
     
     <h1>Monitored Inventory</h1>
+    {{if .Data }} 
+    {{if .Enabled}}
+    <div id=table>
+    {{template "table" .}}
+  </div>
 
-  
-  {{if .Data }} 
-  {{if .Enabled}}
-  <table id="tab">
-    <tr>
-      
-      <th>Name</th>
-      <th colspan="2" >In Stock</th>
-      
-    </tr>
-  
-     {{range .Data}}
-     <tr>
-       <td>
-         <a href="{{.Url}}"> {{.Name}} <a></a>
-       </td>
-       <td class="five">
-        <p style="float:left;">{{if not .InStock}}
-        No
-        {{else}}
-        Yes
-        {{end}}
-          </p>
-       </td>
-       <td class="five">
-        <form action="/" method="post" id="form{{.Id}}">
-          <input type="hidden" id="form{{.Id}}" name="{{.Id}}" value="{{.Id}}"> 
-          </form>
-          <button title="delete" style="float:right;" type="submit" form="form{{.Id}}" value="Submit">&#8722;</button>
-       </td>
-      
-      
-    </tr>
+
     {{end}}
-    {{end}}
-  </table>
+   
+  
   {{if .Enabled}}
   <div class="info">
     {{.TimeInterval}} Second Refresh Interval
@@ -106,53 +79,20 @@ tr:nth-child(even) {
 
 
 <script>
-function SetTableDisplay(bool){
-  if (bool) {
-    table = document.getElementById("tab");
-    table.style.display = "table"
-    document.getElementById("noneFoundMessage").style.display = "none";
-  }else{
-    table = document.getElementById("tab");
-    table.style.display = "none"
-    document.getElementById("noneFoundMessage").style.display = "inline";
-  }
-}
 
-let tableData = {data:JSON.parse('{{.DataJson}}')}
-
-
-function ClearTable() {
-    var myTable = document.getElementById('tab');
-    var rowCount = myTable.rows.length; 
-    while(--rowCount) myTable.deleteRow(rowCount);
-}
-
-
-
-function compareTwo(oldTable,newTable){
-  if(!oldTable.data || !newTable.data|| oldTable.data.length !== newTable.data.length){
-    return true;
-  }
-  oldTable.data.sort();
-  newTable.data.sort();
-  for (i = 0;i < oldTable.data.length; ++i){
-    if(oldTable.data[i].instock != newTable.data[i].instock){
-      return true
-    }
-  }
-  return false
-}
-
+function ReplaceTable(){
+  fetch(window.location.href+'/api/table')
+    .then(response => response.text())
+    .then(function (html){
+      document.getElementById("table").innerHTML = html;
+    })
+   
+ }
 function UpdateTable(){
-  fetch(window.location.href+'/api/items')
-    .then(response => response.json())
-    .then(data => {
-      if(compareTwo(tableData,data)){
-        location.reload();
-      }
-    });
+    ReplaceTable()
     setTimeout(UpdateTable, 2000);
   }
+ 
   
 UpdateTable();
 
