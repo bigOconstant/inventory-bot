@@ -199,8 +199,7 @@ func (s *Sqlite) SaveSettings(settings dbmodels.Settings) (err error) {
 	`
 	stmt, err := s.db.Prepare(updatestmt)
 	defer stmt.Close()
-	fmt.Println("done preparing")
-	fmt.Println(settings)
+
 	updates := []interface{}{
 		settings.Refresh_interval,
 		settings.User_agent,

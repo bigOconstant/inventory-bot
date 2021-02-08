@@ -44,12 +44,12 @@ tr:nth-child(even) {
   <div id="container">
     
     <h1>Monitored Inventory</h1>
-
+    {{if .Data }} 
+    {{if .Enabled}}
     <div id=table>
     {{template "table" .}}
   </div>
-  {{if .Data }} 
-  {{if .Enabled}}
+
 
     {{end}}
    
