@@ -213,6 +213,5 @@ func (s *Sqlite) SaveSettings(settings dbmodels.Settings) (err error) {
 	if err != nil {
 		fmt.Println("error updating settings:", err)
 	}
-	fmt.Println("returning")
 	return err
 }
