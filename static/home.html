@@ -148,7 +148,11 @@ function UpdateTable(){
     .then(response => response.json())
     .then(data => {
       if(compareTwo(tableData,data)){
-        location.reload();
+        var getUrl = window.location;
+        var baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+        console.log("Found item refreshing! todo remove this and use ajax properly")
+        window.location = baseUrl
+        
       }
     });
     setTimeout(UpdateTable, 2000);

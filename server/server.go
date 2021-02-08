@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -29,22 +30,27 @@ type InStockResponse struct {
 
 func (r *InStockResponse) SetFromSettingsMap(input *models.SettingsMap) {
 	input.Lock()
+	r.Data = nil
 	r.Data = make([]ItemResponse, len(input.Items))
 
 	i := 0
 	for key := range input.Items {
-		r.Data[i].Id = i
+		r.Data[i].Id = key
 		r.Data[i].Name = input.Items[key].Name
 		r.Data[i].Url = input.Items[key].URL
 		r.Data[i].InStock = input.Items[key].InStock
 		i++
 	}
+	sort.Slice(r.Data, func(i, j int) bool {
+		return r.Data[i].Name < r.Data[j].Name
+	})
 	input.Unlock()
 }
 
 type Server struct {
 	Router *mux.Router
 	data   *models.SettingsMap
+	DB     sqlite.SqliteI
 }
 
 func (self *Server) GetInStockItems(w http.ResponseWriter, r *http.Request) {
@@ -118,9 +124,7 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 			Enabled:          update.Enabled,
 			Discord_webhook:  update.Discord}
 
-		fmt.Println(settingsUpdate)
-		db := sqlite.Sqlite{}
-		db.SaveSettings(settingsUpdate)
+		self.DB.SaveSettings(settingsUpdate)
 
 		settingsTemplate.Execute(w, update)
 	} else {
@@ -149,6 +153,10 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 				id, err := strconv.Atoi(value)
 				if err == nil {
 					self.data.RemoveID(id)
+					err := self.DB.DeleteItem(id)
+					if err != nil {
+						fmt.Println("error deleting:", err)
+					}
 				}
 			}
 		}
@@ -170,11 +178,7 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 
 func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 
-	// path, _ := os.Getwd()
-	// path = path + "/html/AddItem.html"
-	// apage, _ := ioutil.ReadFile(path)
 	homeTempl := template.Must(template.New("").Parse(string(box.Get("/AddItem.html"))))
-	//homeTempl := template.Must(template.New("").Parse(string(apage)))
 	if r.URL.Path != "/add" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
@@ -188,10 +192,13 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		_, err := url.ParseRequestURI(r.FormValue("url"))
 		if err == nil {
-			db := sqlite.Sqlite{}
-			id, err := db.SaveItem(r.FormValue("iname"), r.FormValue("url"))
-			fmt.Println("new id :", id, " err:", err)
-			self.data.AddItem(r.FormValue("iname"), r.FormValue("url"))
+			id, err := self.DB.SaveItem(r.FormValue("iname"), r.FormValue("url"))
+			if err == nil {
+				fmt.Println("Added item, id:", id)
+				self.data.AddItem(r.FormValue("iname"), r.FormValue("url"), id)
+			} else {
+				fmt.Println("error:", err)
+			}
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 
 		} else {

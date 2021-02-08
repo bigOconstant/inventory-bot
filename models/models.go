@@ -1,11 +1,7 @@
 package models
 
 import (
-	"encoding/json"
-	"fmt"
 	"goinventory/db/sqlite"
-	"io/ioutil"
-	"os"
 	"sync"
 )
 
@@ -77,19 +73,18 @@ type SettingsMap struct {
 //RemoveID removes an item from the map
 func (s *SettingsMap) RemoveID(id int) {
 
-	newItems := make(map[int]*URLMutex, len(s.Items))
-
-	iterator := 0
-
+	newItems := make(map[int]*URLMutex, 0)
 	for i, item := range s.Items {
 		if i != id {
-			newItems[iterator] = item
-			iterator++
+			item.mu.Lock()
+			newItems[i] = item
+			item.mu.Unlock()
 		}
 	}
+	s.mu.Lock()
 	s.Items = nil
 	s.Items = newItems
-
+	s.mu.Unlock()
 }
 
 func (s *SettingsMap) Clone() *SettingsMap {
@@ -104,14 +99,14 @@ func (s *SettingsMap) Clone() *SettingsMap {
 	return &retVal
 }
 
+//Todo this doesn't need to be a nested loop. Make more effecient
 func (old *SettingsMap) Update(new *SettingsMap) {
-
 	for _, newurl := range new.Items {
 		for _, oldurl := range old.Items {
 			if newurl.Name == oldurl.Name && newurl.URL == oldurl.URL {
-				//oldurl.mu.Lock()
+				oldurl.mu.Lock()
 				oldurl.InStock = newurl.InStock
-				//oldurl.mu.Unlock()
+				oldurl.mu.Unlock()
 			}
 		}
 	}
@@ -138,41 +133,13 @@ func (s *SettingsMap) FromSettings(input *Settings) {
 	}
 }
 
-func (s *SettingsMap) AddItem(name string, url string) {
-
-	newItems := make(map[int]*URLMutex, len(s.Items)+1)
-
-	i := 0
-	for _, item := range s.Items {
-		newItems[i] = item
-		i++
-	}
+func (s *SettingsMap) AddItem(name string, url string, id int) {
 
 	var UrlModel Urls = Urls{Item: name, URL: url}
-
 	um := URLMutex{}
 	um.SetFromUrls(UrlModel)
-	s.Items = nil
-	newItems[i] = &um
-	s.Items = newItems
+	s.Items[id] = &um
 
-}
-
-func (u *SettingsMap) ReadFromFile() {
-	settingsFile, err := os.Open("settings.json")
-	settings := Settings{}
-	if err != nil {
-		settings.Useragent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
-		settings.Delayseconds = 30
-		u.FromSettings(&settings)
-		fmt.Println(err)
-		return
-	}
-
-	byteValue, _ := ioutil.ReadAll(settingsFile)
-	json.Unmarshal([]byte(byteValue), &settings)
-	settingsFile.Close()
-	u.FromSettings(&settings)
 }
 
 func (U *SettingsMap) LoadFromDB(db *sqlite.Sqlite) {

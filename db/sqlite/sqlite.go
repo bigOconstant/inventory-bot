@@ -11,22 +11,29 @@ import (
 
 type SqliteI interface {
 	Init() error
+	Close()
 	SaveSettings(settings dbmodels.Settings) error
 	SaveItem(name string, url string) (id int, err error)
 	GetItems() (items []dbmodels.Item, err error)
 	GetSettings() (settings dbmodels.Settings, err error)
+	DeleteItem(id int) error
 }
 
 type Sqlite struct {
+	db *sql.DB
+}
+
+func (s *Sqlite) Close() {
+	fmt.Println("calling close")
+	s.db.Close()
 }
 
 func (s *Sqlite) Init() (err error) {
 
-	db, err := sql.Open("sqlite3", "./inventory.db")
+	s.db, err = sql.Open("sqlite3", "./inventory.db")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	/* Create and init settings table */
 	sqlStmt := `
@@ -38,7 +45,7 @@ func (s *Sqlite) Init() (err error) {
 		enabled BOOLEAN NOT NULL CHECK (enabled IN (0,1)) DEFAULT 1
 	);
 	`
-	_, err = db.Exec(sqlStmt)
+	_, err = s.db.Exec(sqlStmt)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return err
@@ -47,7 +54,7 @@ func (s *Sqlite) Init() (err error) {
 	sqlStmt = `
 		select count(*) from Settings;
 	`
-	rows, err := db.Query(sqlStmt)
+	rows, err := s.db.Query(sqlStmt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +77,7 @@ func (s *Sqlite) Init() (err error) {
 	if count == 0 {
 		fmt.Println("First run creating settings object")
 		sqlStmt = "insert into Settings (id) Values (1);"
-		_, err = db.Exec(sqlStmt)
+		_, err = s.db.Exec(sqlStmt)
 		if err != nil {
 			log.Printf("%q: %s\n", err, sqlStmt)
 			return err
@@ -87,7 +94,7 @@ func (s *Sqlite) Init() (err error) {
 	);
 	`
 
-	_, err = db.Exec(sqlStmt)
+	_, err = s.db.Exec(sqlStmt)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return err
@@ -95,19 +102,32 @@ func (s *Sqlite) Init() (err error) {
 
 	return nil
 }
+
+func (s *Sqlite) DeleteItem(id int) error {
+	sqlStmt := `
+		delete from Items where id = ?;
+	`
+	stmt, err := s.db.Prepare(sqlStmt)
+	defer stmt.Close()
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(&id)
+
+	return err
+}
 func (s *Sqlite) SaveItem(name string, url string) (id int, err error) {
-	db, err := sql.Open("sqlite3", "./inventory.db")
+
 	if err != nil {
 		fmt.Println("error opening db")
 		log.Printf("%q\n", err)
 		return
 	}
-	defer db.Close()
 
 	insertstmt := `
 			INSERT INTO Items (url,item) VALUES (?,?)
 	`
-	stmt, err := db.Prepare(insertstmt)
+	stmt, err := s.db.Prepare(insertstmt)
 	defer stmt.Close()
 	inserted, err := stmt.Exec(&url, &name)
 	if err != nil {
@@ -126,15 +146,15 @@ func (s *Sqlite) SaveItem(name string, url string) (id int, err error) {
 }
 
 func (s *Sqlite) GetItems() (items []dbmodels.Item, err error) {
-	db, err := sql.Open("sqlite3", "./inventory.db")
+
 	items = make([]dbmodels.Item, 0)
 	if err != nil {
 		fmt.Println("error opening db")
 		log.Fatal(err)
 	}
-	defer db.Close()
+
 	query := "SELECT id,url,item FROM Items;"
-	rows, err := db.Query(query)
+	rows, err := s.db.Query(query)
 	defer rows.Close()
 	for rows.Next() {
 		item := dbmodels.Item{}
@@ -150,19 +170,14 @@ func (s *Sqlite) GetItems() (items []dbmodels.Item, err error) {
 }
 
 func (s *Sqlite) GetSettings() (settings dbmodels.Settings, err error) {
-	db, err := sql.Open("sqlite3", "./inventory.db")
-	if err != nil {
-		fmt.Println("error opening db")
-		log.Fatal(err)
-	}
-	defer db.Close()
+
 	query := `
 			select refresh_interval,
 			user_agent,
 			discord_webhook,
 			enabled from settings;
 	`
-	rows, err := db.Query(query)
+	rows, err := s.db.Query(query)
 	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&settings.Refresh_interval, &settings.User_agent, &settings.Discord_webhook, &settings.Enabled)
@@ -175,22 +190,14 @@ func (s *Sqlite) GetSettings() (settings dbmodels.Settings, err error) {
 }
 
 func (s *Sqlite) SaveSettings(settings dbmodels.Settings) (err error) {
-	db, err := sql.Open("sqlite3", "./inventory.db")
-	if err != nil {
-		fmt.Println("error preparing")
-		log.Fatal(err)
-	}
-	defer db.Close()
-	/*
-		id,refresh_interval , user_agent , discord_webhook , enabled
-	*/
+
 	updatestmt := `
 			update Settings set refresh_interval = ?,
 			user_agent = ?,
 			discord_webhook = ?,
 			enabled = ?;
 	`
-	stmt, err := db.Prepare(updatestmt)
+	stmt, err := s.db.Prepare(updatestmt)
 	defer stmt.Close()
 	fmt.Println("done preparing")
 	fmt.Println(settings)
