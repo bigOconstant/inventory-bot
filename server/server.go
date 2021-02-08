@@ -133,9 +133,32 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
+func (self *Server) ServeTable(w http.ResponseWriter, r *http.Request) {
 
-	homeTempl := template.Must(template.New("").Parse(string(box.Get("/home.html"))))
+	tabletemplate := template.Must(template.New("retval").Parse(string(box.Get("/table.html"))))
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	retVal := InStockResponse{}
+	retVal.SetFromSettingsMap(self.data)
+	var v = struct {
+		Data []ItemResponse
+	}{Data: retVal.Data}
+	tabletemplate.Execute(w, &v)
+
+}
+
+func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
+	item := string(box.Get("/table.html"))
+
+	homeTempl := template.Must(template.New("table").Parse(item))
+
+	final, err := homeTempl.New("home").Parse(string(box.Get("/home.html")))
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
@@ -165,15 +188,12 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 	retVal.SetFromSettingsMap(self.data)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	jsonByte, _ := json.Marshal(retVal.Data)
 	var v = struct {
 		Data         []ItemResponse
 		TimeInterval int
-		DataJson     string
 		Enabled      bool
-	}{Data: retVal.Data, DataJson: string(jsonByte), TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled}
-	homeTempl.Execute(w, &v)
-
+	}{Data: retVal.Data, TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled}
+	final.Execute(w, &v)
 }
 
 func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +214,6 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			id, err := self.DB.SaveItem(r.FormValue("iname"), r.FormValue("url"))
 			if err == nil {
-				fmt.Println("Added item, id:", id)
 				self.data.AddItem(r.FormValue("iname"), r.FormValue("url"), id)
 			} else {
 				fmt.Println("error:", err)
@@ -219,6 +238,7 @@ func (self *Server) ServeAddItem(w http.ResponseWriter, r *http.Request) {
 func (self *Server) Serve(input *models.SettingsMap, port string) {
 	self.data = input
 	self.Router = mux.NewRouter().StrictSlash(true)
+	self.Router.HandleFunc("/api/table", self.ServeTable)
 	self.Router.HandleFunc("/api/items", self.GetInStockItems)
 	self.Router.HandleFunc("/", self.ServeHome)
 	self.Router.HandleFunc("/favicon.ico", self.ServeFavicon)
