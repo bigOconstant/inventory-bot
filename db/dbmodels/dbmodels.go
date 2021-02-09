@@ -6,6 +6,7 @@ type Settings struct {
 	User_agent       string
 	Discord_webhook  string
 	Enabled          bool
+	PageAlerts       bool
 }
 
 type Item struct {

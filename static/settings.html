@@ -32,6 +32,14 @@
         {{else}}
         <input type="checkbox" name="enabled"  ><br>
         {{end}}
+        <label for="pagealerts">Dialog Box Alerting</label><br>
+        {{if .PageAlerts}}
+        <input type="checkbox" name="pagealerts"  checked ><br>
+        {{else}}
+        <input type="checkbox" name="pagealerts"  ><br>
+        {{end}}
+
+
         <input type="submit" value="Update">
      </form>
      <p class="info">Settings changes are not persisted new deployments. Add these to your settings.json to be permanent</p>
