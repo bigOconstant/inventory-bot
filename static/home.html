@@ -98,12 +98,13 @@ function UpdateTable(){
 
 function CheckTable() {
   let table = document.getElementById("tab");
-
+  var count = 0;
   for (let row of table.rows) 
   {
       for(let cell of row.cells) 
       {
           if (cell.innerText == "Yes") {
+            count = count +1;
             if (!alertedObjects[row.cells[0].innerText]) {
               alertedObjects[row.cells[0].innerText] = true;
               if (window.confirm(row.cells[0].innerText+' in stock, click "ok" to go to the store page'))
@@ -114,6 +115,9 @@ function CheckTable() {
           }
         
       }
+  }
+  if (count > 0){
+    document.title = "("+count + ") Admin"
   }
 }
  
