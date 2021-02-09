@@ -80,6 +80,8 @@ tr:nth-child(even) {
 
 <script>
 
+var alertedObjects = {};
+
 function ReplaceTable(){
   fetch(window.location.href+'/api/table')
     .then(response => response.text())
@@ -89,9 +91,31 @@ function ReplaceTable(){
    
  }
 function UpdateTable(){
+    CheckTable()
     ReplaceTable()
     setTimeout(UpdateTable, 2000);
+}
+
+function CheckTable() {
+  let table = document.getElementById("tab");
+
+  for (let row of table.rows) 
+  {
+      for(let cell of row.cells) 
+      {
+          if (cell.innerText == "Yes") {
+            if (!alertedObjects[row.cells[0].innerText]) {
+              alertedObjects[row.cells[0].innerText] = true;
+              if (window.confirm(row.cells[0].innerText+' in stock, click "ok" to go to the store page'))
+              {
+                window.location.href=row.cells[0].getElementsByTagName('a')[0];
+              }
+            }
+          }
+        
+      }
   }
+}
  
   
 UpdateTable();
