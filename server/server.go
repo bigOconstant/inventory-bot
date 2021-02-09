@@ -90,6 +90,7 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 			Useragent:    self.data.Useragent,
 			Discord:      self.data.Discord,
 			Enabled:      self.data.Enabled,
+			PageAlerts:   self.data.PageAlerts,
 			Updated:      false,
 		}
 		settingsTemplate.Execute(w, settings)
@@ -108,12 +109,18 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 		if enabled == "on" {
 			enabledBool = true
 		}
+		PageAlerts := r.FormValue("pagealerts")
+		PageAlertsBool := false
+		if PageAlerts == "on" {
+			PageAlertsBool = true
+		}
 
 		var update models.SettingsUpdate = models.SettingsUpdate{
 			Delayseconds: int64(i),
 			Useragent:    r.FormValue("iuseragent"),
 			Discord:      r.FormValue("idiscord"),
 			Enabled:      enabledBool,
+			PageAlerts:   PageAlertsBool,
 			Updated:      true,
 		}
 		self.data.UpdateFromSettingsUpdate(&update)
@@ -122,6 +129,7 @@ func (self *Server) ServeSettings(w http.ResponseWriter, r *http.Request) {
 			Refresh_interval: int(update.Delayseconds),
 			User_agent:       update.Useragent,
 			Enabled:          update.Enabled,
+			PageAlerts:       update.PageAlerts,
 			Discord_webhook:  update.Discord}
 
 		self.DB.SaveSettings(settingsUpdate)
@@ -192,7 +200,8 @@ func (self *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
 		Data         []ItemResponse
 		TimeInterval int
 		Enabled      bool
-	}{Data: retVal.Data, TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled}
+		PageAlerts   bool
+	}{Data: retVal.Data, TimeInterval: int(self.data.Delayseconds), Enabled: self.data.Enabled, PageAlerts: self.data.PageAlerts}
 	final.Execute(w, &v)
 }
 

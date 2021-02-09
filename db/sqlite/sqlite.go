@@ -42,7 +42,8 @@ func (s *Sqlite) Init() (err error) {
 		refresh_interval Integer NOT NULL DEFAULT 30,
 		user_agent TEXT DEFAULT "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
 		discord_webhook TEXT DEFAULT "",
-		enabled BOOLEAN NOT NULL CHECK (enabled IN (0,1)) DEFAULT 1
+		enabled BOOLEAN NOT NULL CHECK (enabled IN (0,1)) DEFAULT 1,
+		page_alerts BOOLEAN NOT NULL CHECK (enabled IN (0,1)) DEFAULT 1
 	);
 	`
 	_, err = s.db.Exec(sqlStmt)
@@ -175,12 +176,13 @@ func (s *Sqlite) GetSettings() (settings dbmodels.Settings, err error) {
 			select refresh_interval,
 			user_agent,
 			discord_webhook,
-			enabled from settings;
+			enabled,
+			page_alerts from settings;
 	`
 	rows, err := s.db.Query(query)
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&settings.Refresh_interval, &settings.User_agent, &settings.Discord_webhook, &settings.Enabled)
+		err = rows.Scan(&settings.Refresh_interval, &settings.User_agent, &settings.Discord_webhook, &settings.Enabled, &settings.PageAlerts)
 		if err != nil {
 			log.Fatal(err)
 		}

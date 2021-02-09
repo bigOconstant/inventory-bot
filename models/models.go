@@ -34,6 +34,7 @@ type SettingsUpdate struct {
 	Discord      string
 	Updated      bool
 	Enabled      bool
+	PageAlerts   bool
 }
 
 //Url struct
@@ -67,6 +68,7 @@ type SettingsMap struct {
 	Useragent    string
 	Discord      string
 	Enabled      bool
+	PageAlerts   bool
 	Items        map[int]*URLMutex
 }
 
@@ -119,6 +121,7 @@ func (s *SettingsMap) UpdateFromSettingsUpdate(su *SettingsUpdate) {
 	s.Discord = su.Discord
 	s.Useragent = su.Useragent
 	s.Enabled = su.Enabled
+	s.PageAlerts = su.PageAlerts
 }
 
 func (s *SettingsMap) FromSettings(input *Settings) {
@@ -148,6 +151,7 @@ func (U *SettingsMap) LoadFromDB(db *sqlite.Sqlite) {
 	U.Discord = settings.Discord_webhook
 	U.Enabled = settings.Enabled
 	U.Useragent = settings.User_agent
+	U.PageAlerts = settings.PageAlerts
 	U.Items = nil
 	U.Items = make(map[int]*URLMutex)
 	items, err := db.GetItems()

@@ -40,7 +40,6 @@ tr:nth-child(even) {
       <a href="/about">About</a>
       <a class="settings" href="/settings">&#9881;</a>
     </div> 
-  
   <div id="container">
     
     <h1>Monitored Inventory</h1>
@@ -81,7 +80,7 @@ tr:nth-child(even) {
 <script>
 
 var alertedObjects = {};
-
+var pageAlerts = {{ .PageAlerts}};
 function ReplaceTable(){
   fetch(window.location.href+'/api/table')
     .then(response => response.text())
@@ -105,7 +104,7 @@ function CheckTable() {
       {
           if (cell.innerText == "Yes") {
             count = count +1;
-            if (!alertedObjects[row.cells[0].innerText]) {
+            if (pageAlerts && !alertedObjects[row.cells[0].innerText]) {
               alertedObjects[row.cells[0].innerText] = true;
               if (window.confirm(row.cells[0].innerText+' in stock, click "ok" to go to the store page'))
               {
